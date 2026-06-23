@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generative AI Leader Practice Exam</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2433; --sub:#5b6478;
+    --line:#e3e7f0; --brand:#1a73e8; --brand-d:#1558c0;
+    --green:#188038; --green-bg:#e6f4ea; --red:#c5221f; --red-bg:#fce8e6;
+    --amber:#e37400; --shadow:0 1px 3px rgba(20,30,60,.08),0 8px 24px rgba(20,30,60,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 64px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:26px 22px}
+  h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:-.3px}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--brand);background:#e8f0fe;
+    padding:4px 10px;border-radius:999px;margin-bottom:14px}
+  p.lead{color:var(--sub);margin:.2rem 0 1.4rem;font-size:.95rem}
+  .opt-group{margin:18px 0}
+  .opt-group h3{font-size:.85rem;color:var(--sub);font-weight:600;margin:0 0 8px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:90px;border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:11px 10px;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.15s}
+  .seg button.active{border-color:var(--brand);background:#e8f0fe;color:var(--brand-d)}
+  .seg button:hover{border-color:var(--brand)}
+  .btn{display:inline-block;width:100%;border:none;background:var(--brand);color:#fff;font-size:1rem;
+    font-weight:700;padding:14px;border-radius:14px;cursor:pointer;margin-top:18px;transition:.15s}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
+  .btn.ghost:hover{background:#f0f5ff}
+  .btn-row{display:flex;gap:10px}
+  .btn-row .btn{margin-top:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:.82rem;color:var(--sub)}
+  .bar{height:8px;background:#e8ebf3;border-radius:999px;overflow:hidden;margin-bottom:20px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,#4285f4,#1a73e8);border-radius:999px;transition:width .3s}
+  .qnum{font-weight:700;color:var(--ink)}
+  .qtext{font-size:1.08rem;font-weight:600;margin:6px 0 6px;letter-spacing:-.2px}
+  #hint{font-size:.82rem;color:var(--brand-d);font-weight:700;margin:0 0 14px}
+  #hint:empty{margin:0}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);background:#fff;
+    border-radius:14px;padding:14px 14px;cursor:pointer;transition:.12s;text-align:left;font-size:.97rem;width:100%}
+  .choice:hover{border-color:var(--brand);background:#fafcff}
+  .choice .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c6ccd8;margin-top:1px;
+    display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff}
+  .choice.sel{border-color:var(--brand);background:#e8f0fe}
+  .choice.sel .dot{border-color:var(--brand);background:var(--brand)}
+  .choice.correct{border-color:var(--green);background:var(--green-bg)}
+  .choice.correct .dot{border-color:var(--green);background:var(--green)}
+  .choice.wrong{border-color:var(--red);background:var(--red-bg)}
+  .choice.wrong .dot{border-color:var(--red);background:var(--red)}
+  .choice[disabled]{cursor:default}
+  .explain{margin-top:16px;border-radius:14px;padding:14px 16px;font-size:.92rem;display:none}
+  .explain.show{display:block}
+  .explain.ok{background:var(--green-bg);border:1px solid #b7e1c1}
+  .explain.no{background:var(--red-bg);border:1px solid #f3c0bd}
+  .explain b{display:block;margin-bottom:4px}
+  .explain .ans{color:var(--green);font-weight:700}
+  .score-ring{width:150px;height:150px;margin:6px auto 14px;border-radius:50%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:conic-gradient(var(--brand) var(--p),#e8ebf3 0)}
+  .score-ring > div{width:118px;height:118px;border-radius:50%;background:#fff;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .score-ring .pct{font-size:2rem;font-weight:800;line-height:1}
+  .score-ring .sub{font-size:.78rem;color:var(--sub)}
+  .verdict{text-align:center;font-size:1.15rem;font-weight:800;margin:6px 0}
+  .verdict.pass{color:var(--green)} .verdict.fail{color:var(--amber)}
+  .stat{display:flex;justify-content:center;gap:24px;margin:14px 0 4px;font-size:.9rem;color:var(--sub)}
+  .stat b{display:block;font-size:1.3rem;color:var(--ink)}
+  .review h3{font-size:1rem;margin:22px 0 10px}
+  .rev-item{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;font-size:.9rem}
+  .rev-item .q{font-weight:600;margin-bottom:7px}
+  .rev-item .yours{color:var(--red)} .rev-item .right{color:var(--green);font-weight:600}
+  .rev-item .ex{color:var(--sub);margin-top:6px;font-size:.86rem}
+  .hide{display:none}
+  .foot{text-align:center;color:#9aa3b6;font-size:.75rem;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="start" class="card">
+    <span class="tag">Google Cloud · Certification Prep</span>
+    <h1>Generative AI Leader — Practice Exam</h1>
+    <p class="lead">Based on 93 real practice questions. Repeatable attempts, auto-scoring, and explanations.</p>
+
+    <div class="opt-group">
+      <h3>Number of questions</h3>
+      <div class="seg" id="seg-count">
+        <button data-v="20">20 questions</button>
+        <button data-v="40">40 questions</button>
+        <button class="active" data-v="93">All 93</button>
+      </div>
+    </div>
+
+    <div class="opt-group">
+      <h3>Scoring mode</h3>
+      <div class="seg" id="seg-mode">
+        <button class="active" data-v="instant">Instant feedback (study)</button>
+        <button data-v="exam">Score at end (exam)</button>
+      </div>
+    </div>
+
+    <div class="opt-group">
+      <h3>Question order</h3>
+      <div class="seg" id="seg-shuffle">
+        <button class="active" data-v="1">Shuffle</button>
+        <button data-v="0">Fixed order</button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startExam()">Start Exam</button>
+    <div class="foot">Passing line set to 75% for study convenience.</div>
+  </section>
+
+  <section id="quiz" class="card hide">
+    <div class="topbar">
+      <span class="qnum" id="qcount"></span>
+      <span id="modeLabel"></span>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="hint"></div>
+    <div class="choices" id="choices"></div>
+    <div class="explain" id="explain"></div>
+    <button class="btn hide" id="nextBtn">Next</button>
+  </section>
+
+  <section id="result" class="card hide">
+    <div class="score-ring" id="ring"><div>
+      <span class="pct" id="pct"></span><span class="sub" id="ratio"></span>
+    </div></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="stat">
+      <div>Correct<b id="nCorrect"></b></div>
+      <div>Wrong<b id="nWrong"></b></div>
+    </div>
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn ghost" onclick="location.reload()">Change settings</button>
+      <button class="btn" onclick="retry()">Retry</button>
+    </div>
+    <div class="review" id="review"></div>
+  </section>
+
+  <div class="foot">© Practice simulator · A study aid, not official Google exam questions.</div>
+</div>
+
+<script>
+/* ===== Question bank (93 Total, Cleansed) ===== */
+const BANK = [
+{q:"A human resources department deploys a generative AI (gen AI) model to screen job applications and provide a shortlist of candidates to recruiters. Recruiters notice that some seemingly qualified candidates are consistently being overlooked, but the AI provides no explanation for its rankings or exclusions. The company needs to address this lack of transparency. What should they do?",
+ o:["Collect a larger and more diverse dataset for the gen AI model.","Fine-tune the gen AI model.","Implement explainable gen AI policies.","Develop fairness assessments for the gen AI model."],
+ a:2,e:"The core problem is the inability to explain decisions, so Explainable AI is the answer."},
+{q:"A company is evaluating the use of large language models (LLMs) to enhance its operations and customer interactions. What is a primary characteristic of LLMs?",
+ o:["LLMs excel in highly specific technical tasks requiring deep, singular domain expertise.","LLMs learn and generalize effectively from small datasets for niche applications.","LLMs have strong inherent logical reasoning and problem-solving abilities without extra prompting.","LLMs are trained on vast datasets, enabling broad language and context understanding, and adaptability across many tasks."],
+ a:3,e:"LLMs are pre-trained on massive data, giving them broad versatility and adaptability."},
+{q:"An AI robot learns optimal package delivery routes in a city. It receives positive scores for fast, successful deliveries and negative scores for delays or failures. Through this feedback, the robot improves its navigation over time. What type of machine learning is being used to train the robot?",
+ o:["Supervised learning","Deep learning","Unsupervised learning","Reinforcement learning"],
+ a:3,e:"Learning by trial-and-error from reward/penalty (scores) is reinforcement learning."},
+{q:"A company wants to use generative AI (gen AI) to automate complex workflows and improve decision-making across its various departments. They are considering implementing AI agents as a key component of strategy. What is the primary function of an AI agent in a gen AI system?",
+ o:["To provide the computing power for training and running advanced AI models.","To be the user interface for interacting with AI models.","To be a smart system that can analyze, use tools, and make decisions to reach goals.","To be a central storage place for the data that AI models use."],
+ a:2,e:"An agent reasons, uses tools, and decides actions to achieve goals."},
+{q:"An advertising agency needs to quickly generate many photorealistic images from text for client campaigns because traditional photoshoots are slow and costly. They want to rapidly create high-quality visuals from text and reduce expenses. Which Google foundation model should they use?",
+ o:["Gemini","Gemma","Veo","Imagen"],
+ a:3,e:"Text-to-image generation is Imagen. Veo is video, Gemini is multimodal text, Gemma is a lightweight open model."},
+{q:"A company is planning to integrate generative AI into its operations but is wary of becoming dependent on a single technology provider. They prioritize the ability to choose and integrate different AI tools and platforms as their needs evolve. Which inherent characteristic of Google Cloud would address this concern?",
+ o:["Google Cloud's emphasis on an open approach within its AI offerings.","Google Cloud's commitment to tightly integrated, proprietary AI solutions.","Google Cloud's strategy prioritizing fully managed AI services that simplify the user experience.","Google Cloud's primary focus on automating AI workflows."],
+ a:0,e:"Avoiding lock-in and wanting freedom to choose/integrate points to openness."},
+{q:"A consulting research team needs to analyze multiple lengthy reports and documents to find key trends and make client recommendations. They require a method to quickly understand each document's core findings, link information across sources, and efficiently organize insights for their report. Manual methods are too slow and complex. Which Google Cloud offering should they use?",
+ o:["NotebookLM","Gemini app","Agent Search on Gemini Enterprise Agent Platform","Google Workspace with Gemini"],
+ a:0,e:"Summarizing, linking, and citing across a set of uploaded documents is NotebookLM's specialty."},
+{q:"A grocery store chain has data in several internal systems like sales, inventory, and marketing. Employees waste time searching these systems for information on product performance, stock, and campaign effectiveness. They need a central way to easily access and understand data across these systems for better decisions and efficiency. Which Google Cloud offering should they use?",
+ o:["Google Workspace with Gemini","Gemini Enterprise","Agent Search on Gemini Enterprise Agent Platform","Conversational Agents"],
+ a:1,e:"Unifying access to data across many enterprise sources for employees is Gemini Enterprise."},
+{q:"A tech company has separate teams using different tools for their machine learning projects, causing duplicated work and scaling issues. They need a central platform to manage all their AI development, deployment, and monitoring efficiently. Which Google Cloud offering should they use?",
+ o:["Cloud Functions","Vertex AI","BigQuery","Cloud Storage"],
+ a:1,e:"Managing the full ML lifecycle (development, deployment, monitoring) on one platform is Vertex AI."},
+{q:"A software company's AI chatbot struggles to answer customer questions about recently released features because this information is not in its original training data. Customers are getting inaccurate answers. The company wants the chatbot to use the latest product documentation to give accurate, up-to-date responses without retraining the entire model. Which technique should they use?",
+ o:["Fine-tuning","Prompt engineering","Retrieval-augmented generation (RAG)","Human-in-the-loop (HITL)"],
+ a:2,e:"Pulling in the latest external docs as grounding context without retraining is RAG."},
+{q:"A business analyst asks a generative AI model about the quarterly revenue of a small startup. The model confidently provides a specific figure and even mentions a supposed press release. However, the startup has not released any financial reports, and no such press release exists. The information is entirely fabricated despite sounding plausible. Which type of LLM limitation does this exemplify?",
+ o:["Bias","Knowledge cutoff","Data dependency","Hallucinations"],
+ a:3,e:"Fabricating plausible-sounding but false information is a hallucination. Knowledge cutoff is different."},
+{q:"A generative AI tool that answers employee policy questions is providing outdated and inaccurate information, causing confusion. The company wants the tool to give reliable answers based on the latest official documents. What should the organization do?",
+ o:["Fine-tune the underlying language model with a broader dataset of general knowledge.","Increase the temperature setting of the language model.","Implement grounding techniques.","Reduce the token count parameter."],
+ a:2,e:"Connecting answers to reliable, up-to-date source documents is grounding."},
+{q:"A sales team wants to create dynamic and personalized video pitches for potential clients. They receive client information in various formats and need an AI model that can transform this information into engaging video content tailored to each client. Which Google model should they use?",
+ o:["Gemma","Gemini","Imagen","Veo"],
+ a:3,e:"Video generation is Veo."},
+{q:"A growing retail company with fragmented phone, email, and basic website chat support needs a unified cloud solution. They require integrated communication channels, consistent customer experiences, and scalable support that ensures security and privacy. Which Google Cloud offering should they use?",
+ o:["Gemini Enterprise Agent Platform","Google Cloud Contact Center as a Service (CCaaS)","Conversational AI","Agent Search on Gemini Enterprise Agent Platform"],
+ a:1,e:"A unified, scalable multi-channel customer support solution is Contact Center as a Service (CCaaS)."},
+{q:"An organization wants to improve how its employees access and use internal company information scattered across various systems, to enhance productivity and decision-making. What is a key benefit of using Gemini Enterprise in this scenario?",
+ o:["Gemini Enterprise primarily focuses on enhancing external customer engagement through AI-powered chatbots.","Gemini Enterprise directly manages the underlying infrastructure and hardware required for AI model training.","Gemini Enterprise allows employees to find and use internal information more easily by creating custom AI agents that can access and understand data from various enterprise sources.","Gemini Enterprise is mainly designed for building and deploying custom machine learning models for predictive analytics."],
+ a:2,e:"Gemini Enterprise boosts employee productivity via custom agents connected to internal data sources."},
+{q:"What is reinforcement learning?",
+ o:["Learning from labeled data with correct output pairs.","Learning by identifying patterns in unlabeled data.","Learning through interaction and feedback.","Learning by training on vast data to generate new content."],
+ a:2,e:"Reinforcement learning trains via interaction and reward/feedback."},
+{q:"A company is developing a system to automatically categorize customer support emails. Thousands of past emails have each been manually reviewed and tagged with a category such as \"Billing Inquiry,\" \"Technical Support,\" or \"Feature Request.\" What type of data is this?",
+ o:["Unlabeled data","Labeled data","Structured data","Raw data"],
+ a:1,e:"Human-assigned categories (tags) make this labeled data."},
+{q:"What is the definition of a generative AI (gen AI) model?",
+ o:["A physical device that houses the hardware components of a gen AI system.","A complex algorithm trained on vast amounts of data to learn patterns and relationships.","A user interface that allows users to interact with a gen AI system.","A set of rules and guidelines governing responsible development and use of gen AI."],
+ a:1,e:"A model is an algorithm trained on large data."},
+{q:"A video game company created a VR game with virtual characters that interact with users in a more natural and intuitive way by using gestures and facial expressions to communicate. What type of agent is this?",
+ o:["Creative agent","Workflow agent","Virtual assistant agent","Conversational agent"],
+ a:3,e:"Focused on natural, interactive communication with users → conversational agent."},
+{q:"A software company has developers who need to write, review, debug, and generate code from natural language descriptions by using generative AI. What type of agent is this?",
+ o:["Data analysis agent","Workflow agent","Data agent","Code agent"],
+ a:3,e:"Writing, reviewing, debugging, and generating code is the job of a code agent."},
+{q:"An advertising agency needs to quickly create many different photorealistic images from text descriptions for client campaigns because traditional photoshoots are too slow and costly. Which Google foundation model should be used?",
+ o:["Gemini","Gemma","Veo","Imagen"],
+ a:3,e:"Text-to-photorealistic-image generation is Imagen. (images = Imagen, video = Veo)"},
+{q:"A research scientist wants to use Veo to visualize live, fluctuating data streams on a real-time dashboard. Why would Veo be a poor choice for this particular task?",
+ o:["Veo generates videos from static inputs like text or images and cannot process or dynamically visualize live data.","Veo may lack specific scientific visualization styles needed for accurate data representation.","Veo use for this scenario would require too many computational resources.","Veo is designed for short-form video, not continuous, long-duration live data displays."],
+ a:0,e:"Veo generates video from static inputs; it isn't a tool for dynamically visualizing real-time data."},
+{q:"A company sells custom-designed phone cases on their website. How should Imagen be effectively used?",
+ o:["To generate realistic images of phone cases on devices from text descriptions of designs.","To analyze customer feedback to identify popular phone case design trends.","To predict demand for different phone case designs based on sales data.","To transcribe customer audio feedback on prototypes of phone case designs."],
+ a:0,e:"Imagen is a text-to-image model, so generating product images is the right use."},
+{q:"A company lacks extensive in-house machine learning and AI expertise. How does Google Cloud democratize AI?",
+ o:["By offering exclusive access to its most powerful AI models for high-spending clients.","By providing fully automated AI solutions requiring no technical user input.","By providing a comprehensive AI platform with low-code/no-code tools, pre-trained models, and easy-to-use APIs.","By offering free custom AI solution development and deployment for all businesses."],
+ a:2,e:"Democratizing AI means enabling non-experts via low-code/no-code tools, pre-trained models, and easy APIs."},
+{q:"A marketing team is brainstorming creative ideas for a new social media campaign. They want to quickly generate various taglines and post drafts to explore options. They need a Google Cloud prebuilt generative AI tool without additional setup that allows for rapid content creation and experimentation. What should the team do?",
+ o:["Use NotebookLM to upload past successful campaigns and analyze their key elements.","Use the Gemini app to create taglines and social media post drafts that align with their campaign goals and target audience.","Create a custom Gem in Gemini Advanced with specific brand guidelines and target audience profiles.","Use Vertex AI to train a custom content-generation model."],
+ a:1,e:"For 'no setup, rapid content creation,' the prebuilt Gemini app fits best."},
+{q:"[Strategy] What is the recommended approach for businesses to effectively implement gen AI?",
+ o:["Combine a top-down strategic vision with bottom-up input from teams.","Adopt the latest gen AI trends.","Focus on a top-down strategy driven by executives.","Focus on a bottom-up approach with no overarching plan."],
+ a:0,e:"Combining an executive top-down vision with bottom-up input from teams is recommended."},
+{q:"[Strategy] What is a key advantage of using Google Cloud's gen AI ecosystem for businesses?",
+ o:["It assures businesses immediate and widespread success in all their generative AI endeavors.","It allows businesses to leverage Google's AI advancements without starting from scratch.","It forces each and every business to become an \"AI-first\" company.","It eliminates the need for companies to cultivate internal gen AI knowledge and experimentation."],
+ a:1,e:"You can reuse Google's proven AI advancements instead of building everything from scratch."},
+{q:"[Strategy] Why is it important for mid-level managers and individual contributors to be involved in gen AI adoption?",
+ o:["Their proximity to workflows allows them to identify impactful gen AI solutions.","They should avoid any involvement in gen AI experimentation.","Their focus should be solely on technical implementation details.","They have limited understanding of daily operations and user needs."],
+ a:0,e:"Being close to day-to-day workflows, they spot the most impactful, practical applications."},
+{q:"[Strategy] Which of the following is a benefit of using Google Cloud for gen AI development?",
+ o:["It offers a limited set of pre-trained AI models for specific industry use cases.","It provides comprehensive services, including scalable infrastructure, enterprise-grade governance and security.","It focuses primarily on individual developer tools without robust governance or scalability features.","It requires extensive upfront hardware investments for running complex AI workloads."],
+ a:1,e:"Comprehensive services with scalable infrastructure, governance, and security are the key benefit."},
+{q:"[Business] Which of the following statements accurately describe Gemini? Select two.",
+ o:["Gemini is a chatbot that can answer questions and generate creative content.","Gemini is a generative AI model (or family of models) developed by Google.","Gemini is a type of artificial intelligence that can create new content, including text, images, music, and even code.","Gemini is a type of generative AI specifically designed for generating images.","Gemini is an AI assistant that can help you be more creative and productive."],
+ a:[1,2],multi:true,e:"Gemini is Google's family of generative AI models that can create many content types (text, images, music, code). It is not image-only, and 'chatbot' describes products, not the model itself."},
+{q:"[Business] Which of the following describes a multimodal gen AI application?",
+ o:["Using Imagen to create an image for a website.","Using gen AI to analyze customer sentiment in video testimonials and survey data.","Using NotebookLM Business to summarize a financial report.","Using Gemini in Gmail to write an email."],
+ a:1,e:"Processing multiple data types together (video + survey/text) is multimodal."},
+{q:"[Business] A CEO is hesitant to invest in generative AI because they believe it's just a technology for building chatbots. Which example demonstrates that gen AI can offer their business much more?",
+ o:["Creating photorealistic images of new product prototypes based on text descriptions.","Counting the number of website visitors and their locations.","Scheduling meetings and managing calendars to help employees improve their time management.","Providing generic responses to all customer inquiries, regardless of the specific issue."],
+ a:0,e:"Generating images shows creative power beyond chatbots."},
+{q:"[Business] Which of the following defines generative AI?",
+ o:["A type of artificial intelligence that focuses on automating repetitive tasks and improving efficiency.","A type of artificial intelligence that analyzes existing data to identify patterns and make predictions.","A type of artificial intelligence that can create new content, including images, text and music.","A specific application, like a chatbot, that utilizes AI technology."],
+ a:2,e:"Generative AI is defined by its ability to create new content."},
+{q:"[Foundations] What is the purpose of a prompt in the context of foundation models?",
+ o:["To provide input to the model and trigger an output.","To train the model on new data.","To fine-tune the model for a specific task.","To evaluate the model's performance."],
+ a:0,e:"A prompt is the input that triggers the model's output."},
+{q:"[Foundations] How do foundation models and prompt engineering work together to create value in generative AI?",
+ o:["Foundation models provide the computing power for generative AI, while prompt engineering directs that power to complete specific tasks.","Foundation models ensure the ethical use of generative AI, while prompt engineering focuses on improving the quality and creativity of outputs.","Prompt engineering trains foundation models on specific tasks, allowing them to generate highly specialized content and insights.","Foundation models offer a vast knowledge base, and prompt engineering guides the model to use this knowledge in responses."],
+ a:3,e:"The model supplies a vast knowledge base; prompt engineering guides how that knowledge is used."},
+{q:"[Foundations] What is the primary difference between foundation models and traditional AI models?",
+ o:["Foundation models are trained on specific data for a single task, while traditional models are trained on diverse data for various tasks.","Foundation models cannot be adapted to new tasks, while traditional models can.","Foundation models are trained on massive amounts of diverse data for various tasks, while traditional models are trained on specific data for a single task.","Foundation models are only trained on text data, while traditional models use images and code."],
+ a:2,e:"Foundation models = large, diverse data, general-purpose; traditional = specific data, single task."},
+{q:"[Foundations] Which of the following is a primary feature of foundation models?",
+ o:["Limited to their initial pre-trained function.","Specialization for a single task.","Adaptability across a wide range of tasks.","Training on small, specific datasets."],
+ a:2,e:"Broad adaptability across many tasks is the defining feature."},
+{q:"[Foundations] Which of the following defines a foundation model?",
+ o:["Small, very specialized AI models trained on narrow datasets in order to perform specific tasks.","Hardware infrastructure used to train and deploy AI models.","Large AI models trained on a vast quantity of data, capable of adapting to a variety of tasks.","Traditional machine learning algorithms that rely on explicitly defined rules."],
+ a:2,e:"A foundation model is a large model trained on vast data and adaptable to many tasks."},
+{q:"[Quiz 3] You're developing an AI-powered loan application assessment system. Which steps would you take to ensure your system is developed responsibly? Select two.",
+ o:["Use a complex \"black box\" model that makes highly accurate predictions, even if its decision-making process is difficult to understand.","Regularly audit the model's performance to identify and mitigate any biases that may emerge over time.","Train the model on a dataset that includes a diverse range of applicants, ensuring representation across different demographics and socioeconomic backgrounds.","Deploy the model without any human oversight, trusting its ability to make fair and unbiased decisions.","Prioritize speed and efficiency over fairness and transparency, as these factors are more important for business success."],
+ a:[1,2],multi:true,e:"Regular auditing for biases and training on diverse, representative datasets are fundamental steps in responsible AI development."},
+{q:"[Quiz 3] Which of the following is a key aspect of securing the \"model training\" phase?",
+ o:["Optimizing the model for faster processing.","Safeguarding training data and model parameters from unauthorized access.","Minimizing the amount of training data used.","Ensuring the model's output is visually appealing."],
+ a:1,e:"Securing the training phase primarily involves protecting the training data and model parameters from unauthorized access."},
+{q:"[Quiz 3] What is the primary goal of the Secure AI Framework (SAIF)?",
+ o:["To restrict AI development and deployment due to concerns about potential security risks.","To establish security standards for building and deploying AI responsibly, addressing the unique challenges and threats in the AI landscape.","To focus solely on preventing external attacks on AI systems.","To promote innovation and accelerate AI development without considering security risks."],
+ a:1,e:"SAIF aims to establish robust security standards specifically tailored for building and deploying AI responsibly."},
+{q:"[Quiz 3] What is a potential consequence of using inaccurate or incomplete data in AI training?",
+ o:["It eliminates the need for fine-tuning and further model training.","It introduces biased outcomes and unfair results.","It results in data storage inefficiency.","It results in an inefficient user interface."],
+ a:1,e:"Inaccurate or incomplete data can lead the model to learn and perpetuate biases, resulting in unfair outcomes."},
+{q:"[Quiz 3] What is the primary goal of ethical AI development?",
+ o:["To comply with all legal and regulatory requirements.","To maximize AI capabilities regardless of societal impact.","To promote transparency and accountability in AI systems.","To ensure AI systems are used responsibly and do not cause harm."],
+ a:3,e:"While transparency is important, the overarching primary goal of ethical AI is ensuring it is used responsibly and avoids causing harm to users and society."},
+{q:"[Quiz 2] Which type of foundation model is specifically designed to understand and generate human language?",
+ o:["Large language model (LLM)","Multimodal model","Diffusion model","Predictive model"],
+ a:0,e:"LLMs are specifically built to understand and generate text/human language."},
+{q:"[Quiz 2] Which techniques can be used to overcome the limitations of foundation model performance?",
+ o:["Advanced algorithms and data structures.","Grounding, prompt engineering, fine-tuning, and humans in the loop (HITL).","Increased processing power and faster hardware.","Preventing hallucinations by restricting the AI model's access to external knowledge sources."],
+ a:1,e:"Grounding, prompt engineering, fine-tuning, and human oversight are the primary techniques to enhance and guide foundation model performance."},
+{q:"[Quiz 2] Which type of foundation model would be most suitable for generating photorealistic images from textual descriptions?",
+ o:["Classification model","Diffusion model","Multimodal model","Large language model (LLM)"],
+ a:1,e:"Diffusion models (like Imagen) are the standard foundation models for generating images from text."},
+{q:"[Quiz 2] What is the primary role of humans in the loop (HITL) in machine learning?",
+ o:["To automate all decision-making processes.","To integrate human expertise into the ML process, especially for tasks requiring judgment or context.","To eliminate the need for data collection and model training.","To replace AI algorithms entirely."],
+ a:1,e:"HITL brings necessary human judgment and context into areas where AI might lack nuance or require verification."},
+{q:"[Quiz 2] What is the primary purpose of grounding in generative AI?",
+ o:["To reduce the cost of deploying AI applications.","To connect the AI's output to verifiable sources of information.","To increase the speed and efficiency of AI model training.","To improve the AI's ability to generate creative content."],
+ a:1,e:"Grounding ties the generative model's responses to specific, verifiable facts or documents to prevent hallucinations."},
+{q:"[Quiz 2] Why is fine-tuning and customization an important factor when choosing a model?",
+ o:["It ensures the model is always available.","It increases the model's context window.","It reduces the cost of using the model.","It allows the model to be adapted for specific tasks or domains."],
+ a:3,e:"Fine-tuning allows a general-purpose model to become specialized for specific organizational tasks or industry domains."},
+{q:"[Quiz 1] What is the primary way that agents learn in reinforcement learning?",
+ o:["By analyzing large datasets of labeled examples.","By interacting with their environment and receiving feedback.","By being explicitly programmed with the correct actions.","By observing and imitating expert demonstrations."],
+ a:1,e:"Reinforcement learning involves an agent learning through trial and error by interacting with an environment and receiving rewards or penalties (feedback)."},
+{q:"[Quiz 1] Arrange the ML lifecycle steps in the right order.",
+ o:["Model training > Data ingestion and preparation > Model deployment > Model management","Model training > Model deployment > Model management > Data ingestion and preparation","Data ingestion and preparation > Model training > Model deployment > Model management","Data ingestion and preparation > Model training > Model management > Model deployment"],
+ a:2,e:"The correct flow is: prepare the data -> train the model -> deploy it -> manage/monitor it."},
+{q:"[Quiz 1] Which of the following is an example of unstructured data?",
+ o:["A spreadsheet with customer names, addresses, and purchase history.","A table of employee names, salaries, and job titles.","A collection of customer reviews in the form of free-text paragraphs.","A database of product IDs, prices, and inventory levels."],
+ a:2,e:"Free-text paragraphs lack a predefined data model or structure, making them unstructured data."},
+{q:"[Quiz 1] What is the primary purpose of the data ingestion and preparation stage in the ML workflow?",
+ o:["Collecting, cleaning, and transforming raw data.","Training machine learning models.","Monitoring model performance.","Deploying trained models."],
+ a:0,e:"Data ingestion and preparation focuses purely on gathering and cleaning the data before training begins."},
+{q:"[Quiz 1] How does consistency impact AI model training?",
+ o:["It increases the speed of data retrieval.","It ensures data is relevant to the task.","It reduces the need for data storage.","Inconsistent formats and labeling can confuse the model and hinder learning."],
+ a:3,e:"Consistent formatting and labeling are crucial because inconsistencies confuse the training algorithm, degrading performance."},
+{q:"[Quiz 1] What is a \"model\" in the context of machine learning?",
+ o:["A visual representation of data.","A type of computer hardware.","A set of pre-defined rules for decision-making.","A complex mathematical structure that processes inputs to generate outputs."],
+ a:3,e:"An ML model is essentially a complex mathematical function trained to process inputs and generate predicted outputs."},
+
+/* ===== 38 New Questions Added From Additional PDFs (Cleansed) ===== */
+{q:"What are the key steps in planning for impact when implementing generative AI solutions?",
+ o:["Focus on technology adoption and assume positive impact will follow.","Prioritize AI capabilities without considering ethical implications.","Collect and analyze data with a focus on short-term goals in the beginning.","Define key metrics, collect and analyze data, and iterate and improve."],
+ a:3,e:"Defining metrics, collecting data, and iterating is the recommended planning step."},
+{q:"Which core capability of Vertex AI Search helps mitigate the issue of hallucinations in generative AI, ensuring that search results are grounded in reliable information?",
+ o:["Granular access controls","Grounding","Advanced analytics","Multimodal search"],
+ a:1,e:"Grounding connects the output to specific and verifiable sources of reliable information."},
+{q:"Which of the following options best identifies the key components of an AI agent?",
+ o:["API connections, cloud functions, and a sophisticated database.","A complex algorithm, a user interface, and a data storage system.","A reasoning loop, tools, and a foundational model.","A detailed user manual, customer service chatbots, and advanced marketing techniques."],
+ a:2,e:"The primary components of an AI agent include a foundational model, tools to take action, and a reasoning loop for decision-making."},
+{q:"What is the primary purpose of Gemini Enterprise within an organization?",
+ o:["To provide a customer-facing interface for interacting with AI-powered chatbots.","To provide a centralized platform for organizing and accessing AI agents that can utilize company data to assist employees.","To enhance the organization's cybersecurity defenses by detecting and preventing data breaches.","To create a centralized repository for storing and managing all company data."],
+ a:1,e:"Gemini Enterprise allows organizations to build and access internal AI agents connected to company data."},
+{q:"What is a key advantage of using a hybrid approach (combining deterministic and generative AI) when building conversational agents with Google Cloud's Customer Engagement Suite?",
+ o:["It allows agents to handle only simple, predictable customer queries.","It enables strict control over agent behavior while leveraging the flexibility of generative AI.","It eliminates the need for human agents in customer interactions.","It restricts agent responses to predefined scripts, ensuring consistency."],
+ a:1,e:"A hybrid approach allows strict control and reliability while simultaneously utilizing the generative flexibility of AI."},
+{q:"According to the provided information, how does a large language model (LLM) interact with data stores in a retrieval-augmented generation (RAG) workflow?",
+ o:["The LLM passively receives information from data stores, waiting for updates to be pushed to it.","The LLM uses data stores to permanently expand its base knowledge and parameters.","The LLM queries data stores to retrieve information relevant to a user's request, enriching its response.","The LLM exclusively relies on data stores for generating responses, disregarding its internal knowledge."],
+ a:2,e:"In RAG, the LLM actively queries external data stores to pull in relevant context before generating the response."},
+{q:"Which of the following statements best describes the function of a \"reasoning loop\" within a generative AI agent?",
+ o:["It enables the agent to interact with users in a conversational manner, responding to prompts and questions.","It establishes a one-time set of instructions for the agent to follow without deviation.","It guides the agent through an iterative process of observation, internal reasoning, and decision-making to solve tasks.","It restricts the agent's actions to a predefined set of responses, ensuring predictable behavior."],
+ a:2,e:"A reasoning loop is an iterative process allowing the agent to observe, reason, and act."},
+{q:"Imagine an AI agent tasked with scheduling a team meeting. The agent needs to access the team members' calendars, propose suitable time slots, and send out invitations. Which combination of agent tools would be most essential for this task?",
+ o:["Data stores and functions.","Plugins and data stores.","Functions and databases.","Extensions and plugins."],
+ a:3,e:"APIs for taking external action (like scheduling on a calendar) typically utilize Extensions and plugins."},
+{q:"Which of the following scenarios best illustrates the concept of a multi-agent system in the context of generative AI?",
+ o:["An AI agent that uses multiple tools, like a database and a web search API, to complete a task.","An AI agent that can be customized with different parameters to adapt to different tasks.","A system where multiple specialized AI agents collaborate to achieve a complex goal, such as booking a trip.","A single AI agent capable of performing multiple tasks, such as writing emails and summarizing documents."],
+ a:2,e:"A multi-agent system involves several distinct specialized agents collaborating to achieve an overall goal."},
+{q:"Which parameter in Google AI Studio would you adjust to control the randomness and creativity of Gemini's output?",
+ o:["Token count","Safety settings","Output length","Temperature"],
+ a:3,e:"Temperature directly controls the randomness/creativity of a model's generation."},
+{q:"What is the primary distinction between Google AI Studio and Vertex AI Studio in terms of their target users?",
+ o:["Google AI Studio is for building custom models, while Vertex AI Studio is for using pre-trained models.","Google AI Studio requires coding experience, while Vertex AI Studio offers a no-code interface for interacting with models.","Google AI Studio is designed for beginners and experimentation, while Vertex AI Studio caters to professionals and larger-scale projects.","Google AI Studio is for accessing image generation models, while Vertex AI Studio is for text-based models."],
+ a:2,e:"Google AI Studio is tailored for rapid prototyping and experimentation, while Vertex AI Studio is built for enterprise-grade, large-scale projects."},
+{q:"Which of the following statements about the Gemini for Google Cloud enterprise security model is true?",
+ o:["Google controls access and permissions for customer data.","Customer data is included in publicly accessible datasets.","Customer data is shared with third-party developers.","Customer data is encrypted and access controls are in place."],
+ a:3,e:"Under the enterprise security model, customer data is never publicly shared or used to train public models; it remains encrypted with robust access controls."},
+{q:"A team of developers wants to improve their coding efficiency and collaboration. Which Gemini for Google Cloud tool would be most beneficial for them?",
+ o:["Gemini in Security Command Center","Gemini in Databases","Gemini Code Assist","Gemini Cloud Assist"],
+ a:2,e:"Gemini Code Assist is built to aid developers directly with code generation, review, and collaboration."},
+{q:"What is the primary advantage of using Saved info in Gemini compared to reusing prompts by copying and pasting them from a document?",
+ o:["Saved info ensures that specific information, like your role or company details, is consistently applied across all your Gemini interactions.","Saved info is automatically shared with all your colleagues, promoting collaboration.","Saved info is where you save your Gemini passwords.","Saved info allows you to store prompts with richer formatting, such as bolding and bullet points."],
+ a:0,e:"Saved info acts as a persistent memory layer, applying your background context to all conversations without manual repasting."},
+{q:"How does grounding improve the reliability of a Gem in Gemini?",
+ o:["It enables the Gem to learn from user interactions and improve its responses over time.","It allows the Gem to access and process information from any website on the internet.","It connects the Gem's output to specific and verifiable sources of information.","It prevents the Gem from generating any responses that are inaccurate."],
+ a:2,e:"Grounding forces the model to cite verifiable sources, thereby significantly reducing hallucinations and improving reliability."},
+{q:"You're a product manager preparing for a meeting to discuss a new product launch. You have market research reports, competitor analysis, and customer feedback surveys stored in your Google Drive. How can NotebookLM help you prepare for this meeting?",
+ o:["NotebookLM can summarize the key findings from your documents, identify potential challenges, and provide talking points for discussion, helping you lead a productive meeting.","NotebookLM can predict the questions your team will ask based on their personalities and prepare answers in advance.","NotebookLM can automatically send calendar invites to all meeting participants with a suggested agenda.","NotebookLM can automatically generate a presentation with slides and talking points for your meeting."],
+ a:0,e:"NotebookLM grounds its answers specifically in your uploaded documents, making it ideal for summarizing and finding key insights in reports."},
+{q:"What is the primary function of Retrieval-Augmented Generation (RAG) in AI models?",
+ o:["To enhance the AI model's ability to memorize vast amounts of information.","To restrict the AI model's output to a predefined set of responses.","To enable the AI model to access and utilize external knowledge sources for generating outputs.","To replace human intervention in the AI model's output generation process."],
+ a:2,e:"RAG's primary function is searching external data sources to 'augment' the model's generation process."},
+{q:"What is a key advantage of using NotebookLM Enterprise for team projects?",
+ o:["NotebookLM Enterprise is the same as the NotebookLM personal product.","Google has control over your data in NotebookLM Enterprise.","You can manage notebook access using predefined identity and access management (IAM) roles in NotebookLM Enterprise.","Google has access to all your data in NotebookLM Enterprise."],
+ a:2,e:"Enterprise implementations integrate directly with IAM (Identity and Access Management) systems to govern access securely among teams."},
+{q:"You're a freelance writer who specializes in creating different types of content, including blog posts, social media captions, and website copy. You find yourself frequently switching between different writing styles and tones depending on the project. You want to streamline your workflow and ensure consistency in your writing across various formats. Which feature of Gemini best suits your needs?",
+ o:["Gems","Gemini for Google Cloud","Gemini Saved info","Gemini Deep Research"],
+ a:0,e:"Gems allow you to create distinct, custom-tailored personalities or roles optimized for specific styles and workflows."},
+{q:"You're leading a virtual team meeting in Google Meet with colleagues located in different time zones. Some attendees are struggling to understand the discussion due to language barriers. How can Gemini assist in making this Google Meet video conference more accessible for all participants?",
+ o:["Gemini can provide translated summaries of the spoken conversation in the meeting chat.","Gemini can generate live translated captions with speaker identification, making it easier for everyone to follow along, regardless of language or accent differences.","Gemini can automatically adjust the volume of each speaker to ensure everyone is heard equally.","Gemini can automatically summarize the discussion for those who missed the meeting."],
+ a:1,e:"Live translated captions directly break down language barriers during real-time video conferencing."},
+{q:"Which prompting technique relies entirely on the foundation model's pre-existing knowledge, without any provided examples?",
+ o:["Multi-shot prompting","Zero-shot prompting","Few-shot prompting","One-shot prompting"],
+ a:1,e:"Providing zero examples in the prompt and relying solely on what the model already knows is 'Zero-shot prompting'."},
+{q:"What is the main advantage of using role prompting?",
+ o:["It allows the AI model to learn from a few examples.","It enables complex tasks like planning a business trip itinerary.","It influences the style, tone, and focus of the AI's responses by assigning it a specific persona.","It improves the AI model's ability to understand complex questions."],
+ a:2,e:"Assigning a role/persona immediately sets boundaries for the tone, style, and perspective of the output."},
+{q:"You're designing a language learning app and want to incorporate an AI tutor that can provide personalized feedback to students practicing their conversational skills. Which role-prompt would be most effective in guiding the AI's interactions with students?",
+ o:["\"You are a helpful and encouraging tutor who provides constructive feedback on language learning exercises.\"","\"Provide personalized feedback to students practicing conversational skills.\"","\"You are a language model built to help students learn a new language.\"","\"You are a robot programmed to assess language proficiency.\""],
+ a:0,e:"A good role prompt explicitly defines the persona's tone (helpful/encouraging) and duty (constructive feedback)."},
+{q:"You're drafting a proposal for a new client and want to ensure your writing is clear, concise, and persuasive. How can Gemini in Google Docs assist you in this task?",
+ o:["Gemini in Docs can automatically assign tasks to team members based on their roles on the client project.","Gemini in Docs can predict the client's response to your proposal based on their past interactions.","Gemini in Docs can provide suggestions for improving your writing style, grammar, and tone, and even generate different phrasing options to enhance your message.","Gemini in Docs can analyze your proposal's content and automatically generate relevant visuals like charts and graphs to enhance its impact."],
+ a:2,e:"Gemini in Google Docs acts as an advanced editor, generating phrasing options and improving style/grammar."},
+{q:"What is the primary advantage of edge computing for AI applications?",
+ o:["Increased data storage capacity","Lower development costs","Reduced need for data preprocessing","Real-time responsiveness and reduced latency"],
+ a:3,e:"Processing data locally on the edge removes the need to communicate with a distant server, eliminating latency for real-time applications."},
+{q:"Your marketing team needs to quickly generate engaging product descriptions for an upcoming ecommerce sale. Which approach is the most efficient way to achieve this?",
+ o:["Fine-tune a pre-trained language model from Model Garden on existing product data.","Hire a team of copywriters to write each description manually.","Use a gen AI powered application like Google Workspace with Gemini to draft the descriptions.","Build a custom model from scratch to generate product descriptions."],
+ a:2,e:"For a quick drafting task without highly technical requirements, prebuilt applications like Workspace with Gemini are most efficient."},
+{q:"Who is responsible for building and deploying custom AI agents and integrating AI capabilities into applications?",
+ o:["Business leaders","Network engineers","Developers","AI practitioners"],
+ a:2,e:"Developers are typically the ones writing the code to integrate APIs and deploy functional AI agents/applications."},
+{q:"What is Gemini Nano designed for?",
+ o:["Deploying AI on edge devices and smartphones","Running complex simulations on supercomputers","Training large language models in data centers","Managing and monitoring AI infrastructure"],
+ a:0,e:"Nano is the most efficient version of the Gemini model, specifically optimized for on-device edge computing like mobile phones."},
+{q:"What are GPUs and TPUs in the context of AI infrastructure?",
+ o:["Specialized processors designed for parallel processing in AI tasks.","Software applications for managing AI models.","Storage devices for storing large AI datasets.","Networking protocols for connecting AI systems."],
+ a:0,e:"Graphics Processing Units (GPUs) and Tensor Processing Units (TPUs) are specialized hardware accelerating the math operations behind AI."},
+{q:"Why is high-performance storage important for generative AI?",
+ o:["To ensure the responsible use of AI systems.","To provide a user-friendly interface for interacting with AI models.","To automate the deployment and management of AI models.","To store and efficiently access the massive datasets used in AI training."],
+ a:3,e:"Foundation models require massive datasets; without fast storage, training pipelines become bottlenecked reading data."},
+{q:"What is the purpose of AutoML in Vertex AI?",
+ o:["To automate the entire ML workflow, from data preparation to deployment.","To provide pre-trained models for various use cases.","To manage and monitor the performance of deployed AI models.","To allow users to build and train AI models with minimal technical expertise."],
+ a:3,e:"AutoML automates complex tuning processes, allowing those with limited ML expertise to train high-quality models."},
+{q:"What is the role of MLOps in Vertex AI?",
+ o:["To learn how to best achieve a goal based on inputs and tools.","To automate, standardize, and manage the ML project lifecycle.","To allow users to interact with AI capabilities.","To provide the physical hardware for AI systems."],
+ a:1,e:"Machine Learning Operations (MLOps) provides the framework to reliably build, deploy, and maintain machine learning systems."},
+{q:"Which of the following statements best describes Model Garden on Vertex AI?",
+ o:["A service for discovering, customizing, and deploying existing AI models.","A platform for developing AI models from scratch and experimenting further.","A service designed for finding and deploying pre-trained AI models.","A platform for managing and monitoring AI infrastructure."],
+ a:0,e:"Model Garden acts as a repository where you can discover, tune, and deploy both Google's foundational models and third-party open-source models."},
+{q:"A travel agency wants to use an AI agent to help customers plan their vacations. How would the \"agents\" layer and the \"applications\" layer work together to create this AI powered travel planning experience?",
+ o:["The agents layer would provide the user interface for the travel planning application.","The applications layer would provide the computational resources for the AI agent to operate.","The applications layer would determine the specific tasks the AI agent can perform, such as searching for flights or booking hotels.","The agents layer would define the AI's capabilities (searching, booking, recommending), while the applications layer would provide the user-facing tool (website or app) to interact with the agent."],
+ a:3,e:"Agents house the reasoning and capabilities, while Applications provide the UI/UX wrapper that the end-user interacts with."},
+{q:"A game developer wants to create more realistic and engaging non-player characters (NPCs) in their game... Which layer of the gen AI landscape would be MOST crucial in defining the behaviors and capabilities of these AI powered NPCs?",
+ o:["Agents","Platforms","Infrastructure","Models"],
+ a:0,e:"Because the NPCs need dynamic behaviors, reactions, and decision-making logic, they map best to the 'Agents' layer."},
+{q:"A news organization wants to develop an AI agent that delivers personalized news to each user... How would the \"agents\" layer contribute to the functionality of this personalized news reader application?",
+ o:["The agents layer would provide the infrastructure for storing and processing the news data.","The agents layer would design the user interface of the news reader application.","The agents layer would provide the underlying AI models for natural language processing and understanding.","The agents layer would define the specific tasks the AI performs, such as filtering articles, summarizing information, and making recommendations."],
+ a:3,e:"The agents layer specifies exactly what workflows the AI can execute (filtering, summarizing) to reach its goal."},
+{q:"What are the two key elements that distinguish AI agents from standalone AI models?",
+ o:["Automation and personalization.","Data access and user interface.","Natural language processing and machine learning.","Reasoning loop and tools."],
+ a:3,e:"Unlike standalone models that just answer text, agents use a reasoning loop to decide which 'tools' (APIs, searches) to call."},
+{q:"A data science team is training a new generative AI model on a massive dataset of images. They need access to powerful hardware and software resources... Which layer of the gen AI landscape would provide the necessary computational power and storage for this data science team?",
+ o:["Platforms","Agents","Infrastructure","Applications"],
+ a:2,e:"The Infrastructure layer provides the base computational power (TPUs, GPUs, storage) required for training massive datasets."}
+];
+
+/* ===== State ===== */
+let cfg={count:93,mode:"instant",shuffle:true};
+let order=[], idx=0, answers=[], revealed=[];
+
+function bindSeg(id,key,parse){
+  document.querySelectorAll('#'+id+' button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); cfg[key]=parse(b.dataset.v);
+    };
+  });
+}
+bindSeg('seg-count','count',v=>+v);
+bindSeg('seg-mode','mode',v=>v);
+bindSeg('seg-shuffle','shuffle',v=>v==='1');
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function buildOrder(){
+  let ids=[...Array(BANK.length).keys()];
+  if(cfg.shuffle) shuffle(ids);
+  ids=ids.slice(0,Math.min(cfg.count,BANK.length));
+  return ids.map(i=>{
+    const B=BANK[i];
+    const correct=Array.isArray(B.a)?B.a:[B.a];
+    let opts=B.o.map((t,oi)=>({t,correct:correct.includes(oi)}));
+    if(cfg.shuffle) shuffle(opts);
+    const correctIdxs=opts.map((o,k)=>o.correct?k:-1).filter(k=>k>=0);
+    return {q:B.q,e:B.e,multi:!!B.multi,opts,correctIdxs};
+  });
+}
+
+function startExam(){
+  order=buildOrder(); idx=0;
+  answers=new Array(order.length).fill(null);
+  revealed=new Array(order.length).fill(false);
+  document.getElementById('start').classList.add('hide');
+  document.getElementById('result').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  renderQ();
+}
+function retry(){ startExam(); }
+
+function renderQ(){
+  const item=order[idx];
+  document.getElementById('qcount').textContent=`Question ${idx+1} / ${order.length}`;
+  document.getElementById('modeLabel').textContent=cfg.mode==='instant'?'Study mode':'Exam mode';
+  document.getElementById('prog').style.width=(idx/order.length*100)+'%';
+  document.getElementById('qtext').textContent=item.q;
+  document.getElementById('hint').textContent=item.multi?'✓ Select two answers':'';
+  const wrap=document.getElementById('choices'); wrap.innerHTML='';
+  const ex=document.getElementById('explain'); ex.className='explain'; ex.innerHTML='';
+
+  const sel=answers[idx];
+  const selArr=Array.isArray(sel)?sel:(sel===null?[]:[sel]);
+  const revealedNow=item.multi?revealed[idx]:(sel!==null&&cfg.mode==='instant');
+  const letters=['A','B','C','D','E'];
+
+  item.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice';
+    btn.innerHTML=`<span class="dot">${letters[i]}</span><span>${o.t}</span>`;
+    if(revealedNow){
+      btn.disabled=true;
+      if(item.correctIdxs.includes(i)) btn.classList.add('correct');
+      else if(selArr.includes(i)) btn.classList.add('wrong');
+    } else if(selArr.includes(i)) btn.classList.add('sel');
+    btn.onclick=()=>choose(i);
+    wrap.appendChild(btn);
+  });
+
+  if(revealedNow) showExplain();
+
+  const nb=document.getElementById('nextBtn');
+  let show=false,label='',handler=null;
+  const last=(idx===order.length-1);
+  if(item.multi){
+    if(cfg.mode==='instant' && !revealed[idx]){
+      if(selArr.length>0){show=true;label='Check answer';handler=checkMulti;}
+    } else if(selArr.length>0){show=true;label=last?'Submit & Score':'Next';handler=nextQ;}
+  } else if(sel!==null){show=true;label=last?'Submit & Score':'Next';handler=nextQ;}
+  if(show){nb.classList.remove('hide');nb.textContent=label;nb.onclick=handler;}
+  else nb.classList.add('hide');
+}
+
+function choose(i){
+  const item=order[idx];
+  if(item.multi){
+    if(revealed[idx]) return;
+    let arr=Array.isArray(answers[idx])?answers[idx].slice():[];
+    if(arr.includes(i)) arr=arr.filter(x=>x!==i);
+    else { if(arr.length>=item.correctIdxs.length) arr.shift(); arr.push(i); }
+    answers[idx]=arr; renderQ();
+  } else {
+    if(answers[idx]!==null && cfg.mode==='instant') return;
+    answers[idx]=i; renderQ();
+  }
+}
+function checkMulti(){ revealed[idx]=true; renderQ(); }
+
+function showExplain(){
+  const item=order[idx], ex=document.getElementById('explain');
+  let ok;
+  if(item.multi){
+    const s=Array.isArray(answers[idx])?answers[idx]:[];
+    ok=s.length===item.correctIdxs.length && item.correctIdxs.every(c=>s.includes(c));
+  } else ok=answers[idx]===item.correctIdxs[0];
+  ex.className='explain show '+(ok?'ok':'no');
+  const letters=['A','B','C','D','E'];
+  const ans=item.correctIdxs.map(k=>letters[k]+'. '+item.opts[k].t).join('<br>');
+  ex.innerHTML=`<b>${ok?'✅ Correct':'❌ Incorrect'}</b>
+    <span class="ans">Answer: ${ans}</span>
+    <div style="margin-top:8px">${item.e}</div>`;
+}
+
+function nextQ(){ if(idx<order.length-1){ idx++; renderQ(); } else finish(); }
+
+function isCorrect(it,ans){
+  if(it.multi){
+    const s=Array.isArray(ans)?ans:[];
+    return s.length===it.correctIdxs.length && it.correctIdxs.every(c=>s.includes(c));
+  }
+  return ans===it.correctIdxs[0];
+}
+
+function finish(){
+  let c=0;
+  order.forEach((it,i)=>{ if(isCorrect(it,answers[i])) c++; });
+  const total=order.length, pct=Math.round(c/total*100), pass=pct>=75;
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('result').classList.remove('hide');
+  document.getElementById('ring').style.background=`conic-gradient(${pass?'#188038':'#e37400'} ${pct}%, #e8ebf3 0)`;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('ratio').textContent=`${c} / ${total}`;
+  const v=document.getElementById('verdict');
+  v.textContent=pass?'🎉 Above the passing line!':'📚 A bit more review needed';
+  v.className='verdict '+(pass?'pass':'fail');
+  document.getElementById('nCorrect').textContent=c;
+  document.getElementById('nWrong').textContent=total-c;
+
+  const rev=document.getElementById('review'); rev.innerHTML='';
+  const wrongs=order.map((it,i)=>({it,i})).filter(x=>!isCorrect(x.it,answers[x.i]));
+  if(wrongs.length){
+    const h=document.createElement('h3'); h.textContent=`Review of incorrect answers (${wrongs.length})`; rev.appendChild(h);
+    wrongs.forEach(({it,i})=>{
+      const ans=answers[i];
+      const your=(ans===null||(Array.isArray(ans)&&!ans.length))?'(no answer)':
+        (Array.isArray(ans)?ans.map(k=>it.opts[k].t).join(' / '):it.opts[ans].t);
+      const right=it.correctIdxs.map(k=>it.opts[k].t).join(' / ');
+      const d=document.createElement('div'); d.className='rev-item';
+      d.innerHTML=`<div class="q">Q. ${it.q}</div>
+        <div class="yours">✗ Your answer: ${your}</div>
+        <div class="right">✓ Correct: ${right}</div>
+        <div class="ex">${it.e}</div>`;
+      rev.appendChild(d);
+    });
+  }else{
+    const h=document.createElement('h3'); h.textContent='Perfect — no mistakes 👏'; rev.appendChild(h);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>

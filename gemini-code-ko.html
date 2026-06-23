@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generative AI Leader 모의시험</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2433; --sub:#5b6478;
+    --line:#e3e7f0; --brand:#1a73e8; --brand-d:#1558c0;
+    --green:#188038; --green-bg:#e6f4ea; --red:#c5221f; --red-bg:#fce8e6;
+    --amber:#e37400; --shadow:0 1px 3px rgba(20,30,60,.08),0 8px 24px rgba(20,30,60,.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Apple SD Gothic Neo",Roboto,"Noto Sans KR",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:760px;margin:0 auto;padding:20px 16px 64px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:26px 22px}
+  h1{font-size:1.5rem;margin:0 0 4px;letter-spacing:-.3px}
+  .tag{display:inline-block;font-size:.72rem;font-weight:700;color:var(--brand);background:#e8f0fe;
+    padding:4px 10px;border-radius:999px;margin-bottom:14px}
+  p.lead{color:var(--sub);margin:.2rem 0 1.4rem;font-size:.95rem}
+  .opt-group{margin:18px 0}
+  .opt-group h3{font-size:.85rem;color:var(--sub);font-weight:600;margin:0 0 8px}
+  .seg{display:flex;gap:8px;flex-wrap:wrap}
+  .seg button{flex:1;min-width:90px;border:1px solid var(--line);background:#fff;color:var(--ink);
+    padding:11px 10px;border-radius:12px;font-size:.9rem;font-weight:600;cursor:pointer;transition:.15s}
+  .seg button.active{border-color:var(--brand);background:#e8f0fe;color:var(--brand-d)}
+  .seg button:hover{border-color:var(--brand)}
+  .btn{display:inline-block;width:100%;border:none;background:var(--brand);color:#fff;font-size:1rem;
+    font-weight:700;padding:14px;border-radius:14px;cursor:pointer;margin-top:18px;transition:.15s}
+  .btn:hover{background:var(--brand-d)}
+  .btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
+  .btn.ghost:hover{background:#f0f5ff}
+  .btn-row{display:flex;gap:10px}
+  .btn-row .btn{margin-top:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:.82rem;color:var(--sub)}
+  .bar{height:8px;background:#e8ebf3;border-radius:999px;overflow:hidden;margin-bottom:20px}
+  .bar > i{display:block;height:100%;background:linear-gradient(90deg,#4285f4,#1a73e8);border-radius:999px;transition:width .3s}
+  .qnum{font-weight:700;color:var(--ink)}
+  .qtext{font-size:1.08rem;font-weight:600;margin:6px 0 6px;letter-spacing:-.2px}
+  #hint{font-size:.82rem;color:var(--brand-d);font-weight:700;margin:0 0 14px;min-height:0}
+  #hint:empty{margin:0}
+  .choices{display:flex;flex-direction:column;gap:10px}
+  .choice{display:flex;gap:12px;align-items:flex-start;border:1.5px solid var(--line);background:#fff;
+    border-radius:14px;padding:14px 14px;cursor:pointer;transition:.12s;text-align:left;font-size:.97rem;width:100%}
+  .choice:hover{border-color:var(--brand);background:#fafcff}
+  .choice .dot{flex:none;width:22px;height:22px;border-radius:50%;border:2px solid #c6ccd8;margin-top:1px;
+    display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:800;color:#fff}
+  .choice.sel{border-color:var(--brand);background:#e8f0fe}
+  .choice.sel .dot{border-color:var(--brand);background:var(--brand)}
+  .choice.correct{border-color:var(--green);background:var(--green-bg)}
+  .choice.correct .dot{border-color:var(--green);background:var(--green)}
+  .choice.wrong{border-color:var(--red);background:var(--red-bg)}
+  .choice.wrong .dot{border-color:var(--red);background:var(--red)}
+  .choice[disabled]{cursor:default}
+  .explain{margin-top:16px;border-radius:14px;padding:14px 16px;font-size:.92rem;display:none}
+  .explain.show{display:block}
+  .explain.ok{background:var(--green-bg);border:1px solid #b7e1c1}
+  .explain.no{background:var(--red-bg);border:1px solid #f3c0bd}
+  .explain b{display:block;margin-bottom:4px}
+  .explain .ans{color:var(--green);font-weight:700}
+  .score-ring{width:150px;height:150px;margin:6px auto 14px;border-radius:50%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;background:conic-gradient(var(--brand) var(--p),#e8ebf3 0)}
+  .score-ring > div{width:118px;height:118px;border-radius:50%;background:#fff;display:flex;flex-direction:column;
+    align-items:center;justify-content:center}
+  .score-ring .pct{font-size:2rem;font-weight:800;line-height:1}
+  .score-ring .sub{font-size:.78rem;color:var(--sub)}
+  .verdict{text-align:center;font-size:1.15rem;font-weight:800;margin:6px 0}
+  .verdict.pass{color:var(--green)} .verdict.fail{color:var(--amber)}
+  .stat{display:flex;justify-content:center;gap:24px;margin:14px 0 4px;font-size:.9rem;color:var(--sub)}
+  .stat b{display:block;font-size:1.3rem;color:var(--ink)}
+  .review h3{font-size:1rem;margin:22px 0 10px}
+  .rev-item{border:1px solid var(--line);border-radius:12px;padding:13px 14px;margin-bottom:10px;font-size:.9rem}
+  .rev-item .q{font-weight:600;margin-bottom:7px}
+  .rev-item .yours{color:var(--red)} .rev-item .right{color:var(--green);font-weight:600}
+  .rev-item .ex{color:var(--sub);margin-top:6px;font-size:.86rem}
+  .hide{display:none}
+  .foot{text-align:center;color:#9aa3b6;font-size:.75rem;margin-top:22px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <section id="start" class="card">
+    <span class="tag">Google Cloud · 자격증 대비</span>
+    <h1>Generative AI Leader 모의시험</h1>
+    <p class="lead">실제 연습문제 93문항 기반. 반복 응시·자동 채점·해설을 제공합니다.</p>
+
+    <div class="opt-group">
+      <h3>문항 수</h3>
+      <div class="seg" id="seg-count">
+        <button data-v="20">20문항</button>
+        <button data-v="40">40문항</button>
+        <button class="active" data-v="93">전체 93문항</button>
+      </div>
+    </div>
+
+    <div class="opt-group">
+      <h3>채점 방식</h3>
+      <div class="seg" id="seg-mode">
+        <button class="active" data-v="instant">즉시 해설 (학습용)</button>
+        <button data-v="exam">마지막 일괄 채점 (실전)</button>
+      </div>
+    </div>
+
+    <div class="opt-group">
+      <h3>문제 순서</h3>
+      <div class="seg" id="seg-shuffle">
+        <button class="active" data-v="1">랜덤 셔플</button>
+        <button data-v="0">고정 순서</button>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startExam()">시험 시작</button>
+    <div class="foot">합격 기준선은 학습 편의를 위해 75%로 설정되어 있습니다.</div>
+  </section>
+
+  <section id="quiz" class="card hide">
+    <div class="topbar">
+      <span class="qnum" id="qcount"></span>
+      <span id="modeLabel"></span>
+    </div>
+    <div class="bar"><i id="prog"></i></div>
+    <div class="qtext" id="qtext"></div>
+    <div id="hint"></div>
+    <div class="choices" id="choices"></div>
+    <div class="explain" id="explain"></div>
+    <button class="btn hide" id="nextBtn">다음</button>
+  </section>
+
+  <section id="result" class="card hide">
+    <div class="score-ring" id="ring"><div>
+      <span class="pct" id="pct"></span><span class="sub" id="ratio"></span>
+    </div></div>
+    <div class="verdict" id="verdict"></div>
+    <div class="stat">
+      <div>맞힘<b id="nCorrect"></b></div>
+      <div>틀림<b id="nWrong"></b></div>
+    </div>
+    <div class="btn-row" style="margin-top:18px">
+      <button class="btn ghost" onclick="location.reload()">설정 변경</button>
+      <button class="btn" onclick="retry()">다시 풀기</button>
+    </div>
+    <div class="review" id="review"></div>
+  </section>
+
+  <div class="foot">© 연습용 시뮬레이터 · 실제 Google 시험 문제가 아닌 학습 보조 자료입니다.</div>
+</div>
+
+<script>
+/* ===== 문제 데이터 (93문항 전체, 정제 완료) ===== */
+const BANK = [
+{q:"인사부서가 채용 지원서를 선별하는 생성형 AI 모델을 배포했습니다. 적격으로 보이는 일부 지원자가 계속 탈락하지만 AI는 순위·제외 사유를 설명하지 않습니다. 이 투명성 부족 문제를 해결하려면?",
+ o:["더 크고 다양한 데이터셋을 수집한다.","생성형 AI 모델을 파인튜닝한다.","설명 가능한(explainable) 생성형 AI 정책을 도입한다.","공정성 평가를 개발한다."],
+ a:2,e:"의사결정 '근거를 설명'하지 못하는 것이 핵심 문제이므로 설명가능성(Explainable AI)이 정답."},
+{q:"기업이 운영과 고객 상호작용 강화를 위해 LLM 도입을 검토 중입니다. LLM의 주요 특징은?",
+ o:["깊고 단일한 도메인 전문성이 필요한 고도로 특정한 기술 작업에 탁월하다.","작은 데이터셋에서 효과적으로 학습·일반화한다.","추가 프롬프팅 없이 강한 논리·문제해결 능력을 내재한다.","방대한 데이터로 학습되어 폭넓은 언어·맥락 이해와 다양한 작업 적응력을 가진다."],
+ a:3,e:"LLM은 대규모 데이터로 사전학습되어 범용성·적응력이 특징입니다."},
+{q:"AI 로봇이 도시 내 최적 배송 경로를 학습합니다. 빠르고 성공적인 배송엔 양(+)의 점수, 지연·실패엔 음(-)의 점수를 받아 시간이 지나며 개선됩니다. 어떤 머신러닝 유형인가요?",
+ o:["지도학습 (Supervised)","딥러닝 (Deep learning)","비지도학습 (Unsupervised)","강화학습 (Reinforcement)"],
+ a:3,e:"보상/벌점(점수) 피드백으로 시행착오를 통해 개선 → 강화학습."},
+{q:"기업이 여러 부서의 복잡한 워크플로우 자동화와 의사결정 개선을 위해 AI 에이전트 도입을 고려합니다. 생성형 AI 시스템에서 AI 에이전트의 주요 기능은?",
+ o:["고급 AI 모델 학습·실행을 위한 컴퓨팅 파워 제공","AI 모델과 상호작용하는 사용자 인터페이스","분석·도구 사용·의사결정을 통해 목표를 달성하는 스마트 시스템","AI 모델이 쓰는 데이터의 중앙 저장소"],
+ a:2,e:"에이전트는 추론하고 도구를 사용하며 스스로 행동을 결정해 목표를 달성합니다."},
+{q:"광고대행사가 전통적 촬영의 느림·비용 문제로, 텍스트에서 사실적인 이미지를 빠르게 다량 생성하려 합니다. 어떤 Google 파운데이션 모델을 써야 할까요?",
+ o:["Gemini","Gemma","Veo","Imagen"],
+ a:3,e:"텍스트→이미지 생성은 Imagen. Veo는 동영상, Gemini는 멀티모달 텍스트, Gemma는 경량 오픈모델."},
+{q:"기업이 단일 기술 공급자 종속(lock-in)을 우려하며, 필요에 따라 다양한 AI 도구·플랫폼을 선택·통합하는 능력을 중시합니다. 이를 해결하는 Google Cloud의 고유 특성은?",
+ o:["AI 제공에 있어 개방형(open) 접근 방식 강조","긴밀히 통합된 독점(proprietary) AI 솔루션","완전관리형 AI 서비스로 사용자 경험 단순화 전략","AI 워크플로우 자동화에 대한 주력"],
+ a:0,e:"종속을 피하고 선택·통합 자유를 원하면 '개방성(openness)'이 핵심."},
+{q:"컨설팅 리서치팀이 여러 장문의 보고서를 분석해 핵심 트렌드를 찾고 출처 간 정보를 연결해야 합니다. 각 문서의 핵심을 빠르게 이해하고 통찰을 정리하려면 어떤 Google Cloud 제품이 적합할까요?",
+ o:["NotebookLM","Gemini 앱","Gemini Enterprise Agent Platform의 Agent Search","Gemini가 포함된 Google Workspace"],
+ a:0,e:"업로드한 다수 문서를 근거로 요약·연결·출처 인용을 해주는 도구는 NotebookLM."},
+{q:"식료품 체인이 판매·재고·마케팅 등 여러 내부 시스템에 데이터가 흩어져 있어 직원들이 검색에 시간을 낭비합니다. 시스템 전반의 데이터를 쉽게 접근·이해할 중앙 수단이 필요합니다. 어떤 제품을 써야 할까요?",
+ o:["Gemini가 포함된 Google Workspace","Gemini Enterprise","Gemini Enterprise Agent Platform의 Agent Search","Conversational Agents"],
+ a:1,e:"여러 엔터프라이즈 소스의 데이터를 직원이 통합 활용하도록 돕는 것은 Gemini Enterprise."},
+{q:"여러 팀이 서로 다른 도구로 ML 프로젝트를 진행해 중복 작업·확장 문제가 발생합니다. AI 개발·배포·모니터링 전체를 효율적으로 관리할 중앙 플랫폼이 필요합니다. 어떤 제품을 써야 할까요?",
+ o:["Cloud Functions","Vertex AI","BigQuery","Cloud Storage"],
+ a:1,e:"ML 라이프사이클(개발·배포·모니터링) 전반을 통합 관리하는 플랫폼은 Vertex AI."},
+{q:"소프트웨어 기업의 챗봇이 최근 출시 기능 질문에 잘 답하지 못합니다. 해당 정보가 원래 학습 데이터에 없기 때문입니다. 전체 재학습 없이 최신 제품 문서로 정확·최신 답변을 하게 하려면?",
+ o:["파인튜닝 (Fine-tuning)","프롬프트 엔지니어링","검색 증강 생성 (RAG)","휴먼인더루프 (HITL)"],
+ a:2,e:"재학습 없이 '외부 최신 문서를 검색해 근거로 답변'하게 하는 것은 RAG."},
+{q:"비즈니스 분석가가 최근 시장에 진입한 작은 스타트업의 분기 매출을 생성형 AI에 물었습니다. 모델은 구체적 수치와 보도자료까지확신 있게 제시했지만, 실제로는 재무보고서도 보도자료도 존재하지 않았습니다. 그럴듯하지만 완전히 날조된 이 정보는 어떤 LLM 한계인가요?",
+ o:["편향 (Bias)","지식 컷오프 (Knowledge cutoff)","데이터 의존성","환각 (Hallucinations)"],
+ a:3,e:"사실이 아닌 정보를 그럴듯하게 '지어내는' 것은 환각. 지식 컷오프는 '특정 시점 이후 정보를 모름'으로 다릅니다."},
+{q:"직원 정책 질문에 답하는 생성형 AI 도구가 오래되고 부정확한 정보를 제공해 혼란을 줍니다. 최신 공식 문서에 기반한 신뢰할 답변을 원합니다. 조직은 무엇을 해야 할까요?",
+ o:["일반 지식의 광범위한 데이터셋으로 모델을 파인튜닝한다.","모델의 temperature 설정을 높인다.","그라운딩(grounding) 기법을 도입한다.","토큰 수 파라미터를 줄인다."],
+ a:2,e:"답변을 신뢰할 수 있는 최신 사실 출처에 '연결'하는 것이 그라운딩."},
+{q:"영업팀이 잠재 고객용 동적·맞춤형 영상 피치를 만들려 합니다. 다양한 형식의 고객 정보를 받아 고객별 요구에 맞춘 매력적인 영상 콘텐츠로 변환할 모델이 필요합니다. 어떤 Google 모델을 써야 할까요?",
+ o:["Gemma","Gemini","Imagen","Veo"],
+ a:3,e:"영상(video) 생성은 Veo."},
+{q:"성장 중인 소매기업이 분산된 전화·이메일·기본 웹챗 지원을 하나로 통합하려 합니다. 통합 채널, 일관된 고객 경험, 보안·프라이버시를 보장하는 확장형 지원이 필요합니다. 어떤 제품을 써야 할까요?",
+ o:["Gemini Enterprise Agent Platform","Google Cloud Contact Center as a Service (CCaaS)","Conversational AI","Gemini Enterprise Agent Platform의 Agent Search"],
+ a:1,e:"멀티채널 고객 지원을 통합·확장하는 솔루션은 Contact Center as a Service(CCaaS)."},
+{q:"여러 시스템에 흩어진 사내 정보를 직원이 더 잘 접근·활용하도록 하려 합니다. 이 시나리오에서 Gemini Enterprise의 핵심 이점은?",
+ o:["AI 챗봇으로 외부 고객 참여 강화에 주력한다.","AI 모델 학습용 인프라·하드웨어를 직접 관리한다.","다양한 엔터프라이즈 소스의 데이터를 접근·이해하는 맞춤형 AI 에이전트를 만들어 직원이 사내 정보를 더 쉽게 찾고 활용하게 한다.","예측 분석용 맞춤형 ML 모델 구축·배포가 주 목적이다."],
+ a:2,e:"Gemini Enterprise는 사내 여러 데이터 소스에 연결되는 맞춤형 에이전트로 직원 생산성을 높입니다."},
+{q:"강화학습(Reinforcement learning)이란 무엇인가요?",
+ o:["정답이 라벨링된 데이터로부터 학습","라벨 없는 데이터에서 패턴을 식별해 학습","상호작용과 피드백을 통한 학습","방대한 데이터로 학습해 새 콘텐츠 생성"],
+ a:2,e:"강화학습은 환경과 상호작용하며 보상/피드백으로 학습합니다."},
+{q:"고객 지원 이메일을 자동 분류하는 시스템을 개발 중입니다. 과거 이메일 수천 건이 'Billing Inquiry', 'Technical Support', 'Feature Request' 같은 카테고리로 수동 태깅되어 있습니다. 이 데이터의 유형은?",
+ o:["라벨 없는 데이터 (Unlabeled)","라벨링된 데이터 (Labeled)","구조화 데이터 (Structured)","원시 데이터 (Raw)"],
+ a:1,e:"사람이 카테고리를 부여(태깅)한 데이터는 라벨링된 데이터이며 지도학습에 사용됩니다."},
+{q:"생성형 AI 모델의 정의는?",
+ o:["생성형 AI 시스템의 하드웨어를 담는 물리 장치","패턴·관계를 학습하기 위해 방대한 데이터로 학습된 복잡한 알고리즘","사용자가 생성형 AI와 상호작용하게 하는 UI","책임 있는 개발·사용을 규율하는 규칙·지침 모음"],
+ a:1,e:"모델은 '대규모 데이터로 학습된 알고리즘'입니다."},
+{q:"게임사가 가상현실 게임을 만들었고, 가상 캐릭터가 제스처와 표정을 사용해 더 자연스럽고 직관적인 방식으로 사용자와 상호작용합니다. 이는 어떤 유형의 에이전트인가요?",
+ o:["창작 에이전트 (Creative)","워크플로우 에이전트 (Workflow)","가상 비서 에이전트 (Virtual assistant)","대화형 에이전트 (Conversational)"],
+ a:3,e:"사용자와 자연스럽게 대화·상호작용하는 데 초점이면 대화형(Conversational) 에이전트."},
+{q:"소프트웨어 기업의 개발자들이 자연어 설명으로부터 코드를 작성·검토·디버깅·생성하기 위해 생성형 AI를 사용합니다. 어떤 유형의 에이전트인가요?",
+ o:["데이터 분석 에이전트","워크플로우 에이전트","데이터 에이전트","코드 에이전트 (Code agent)"],
+ a:3,e:"코드 작성·검토·디버깅·생성에 특화된 것은 코드 에이전트."},
+{q:"광고대행사가 전통 촬영의 느림·비용 때문에, 텍스트 설명으로부터 다양한 사실적 이미지를 빠르게 만들어 캠페인 속도를 높이고 비용을 줄이려 합니다. 어떤 Google 파운데이션 모델을 써야 할까요?",
+ o:["Gemini","Gemma","Veo","Imagen"],
+ a:3,e:"텍스트→사실적 이미지 생성은 Imagen. (이미지=Imagen, 영상=Veo)"},
+{q:"연구 과학자가 실시간 대시보드에서 변동하는 라이브 데이터 스트림을 시각화하려고 Veo를 쓰려 합니다. 이 작업에 Veo가 부적합한 이유는?",
+ o:["Veo는 텍스트·이미지 같은 정적 입력으로 영상을 생성하며 실시간 데이터를 동적으로 처리·시각화할 수 없다.","정확한 데이터 표현에 필요한 특정 과학적 시각화 스타일이 부족할 수 있다.","계산 자원이 너무 많이 든다.","Veo는 짧은 영상용이라 장시간 라이브 표시에 부적합하다."],
+ a:0,e:"Veo는 정적 입력 기반 영상 '생성' 모델로, 실시간 변동 데이터를 동적으로 처리·시각화하는 도구가 아닙니다."},
+{q:"맞춤형 휴대폰 케이스를 웹사이트에서 판매하는 기업이 있습니다. Imagen을 효과적으로 사용하는 방법은?",
+ o:["디자인의 텍스트 설명으로부터 기기에 장착된 케이스의 사실적 이미지를 생성한다.","고객 피드백을 분석해 인기 디자인 트렌드를 파악한다.","판매 데이터로 디자인별 수요를 예측한다.","케이스 프로토타입에 대한 고객 음성 피드백을 전사한다."],
+ a:0,e:"Imagen은 텍스트→이미지 생성 모델이므로 '제품 이미지 생성'이 적합한 활용."},
+{q:"사내 ML·AI 전문성이 부족한 기업이 있습니다. Google Cloud는 어떻게 AI를 '민주화'하나요?",
+ o:["고비용 고객에게만 최강 모델 독점 제공","기술 입력이 전혀 필요 없는 완전 자동 AI 솔루션 제공","로우코드/노코드 도구, 사전학습 모델, 사용하기 쉬운 API를 갖춘 포괄적 AI 플랫폼 제공","모든 기업에 무료 맞춤 AI 개발·배포 제공"],
+ a:2,e:"AI 민주화는 전문성이 낮아도 누구나 쓸 수 있도록 로우코드/노코드·사전학습 모델·간편 API를 제공하는 것."},
+{q:"마케팅팀이 새 SNS 캠페인 아이디어를 브레인스토밍합니다. 다양한 태그라인과 초기 게시물 초안을 빠르게 생성해 여러 방향을 탐색하려 하며, 추가 설정 없이 바로 쓰는 Google Cloud 사전 구축 생성형 AI 도구가 필요합니다. 무엇을 해야 할까요?",
+ o:["NotebookLM에 과거 성공 캠페인을 업로드해 핵심 요소를 분석한다.","Gemini 앱으로 캠페인 목표·타깃에 맞는 태그라인과 SNS 게시물 초안을 만든다.","Gemini Advanced에서 브랜드 가이드·타깃 프로필을 담은 맞춤형 Gem을 만든다.","Vertex AI로 맞춤형 콘텐츠 생성 모델을 학습시킨다."],
+ a:1,e:"'추가 설정 없이 즉시' 빠른 콘텐츠 생성·실험에는 사전 구축된 Gemini 앱이 가장 적합."},
+{q:"[전략] 기업이 생성형 AI를 효과적으로 구현하기 위한 권장 접근법은?",
+ o:["하향식 전략 비전과 팀의 상향식 의견을 결합한다.","최신 생성형 AI 트렌드를 그대로 채택한다.","경영진이 주도하는 하향식 전략에만 집중한다.","전체 계획 없이 상향식 접근에만 집중한다."],
+ a:0,e:"경영진의 톱다운 비전과 현장 팀의 보텀업 의견을 결합하는 것이 권장됩니다."},
+{q:"[전략] 기업이 Google Cloud의 생성형 AI 에코시스템을 사용하는 핵심 이점은?",
+ o:["모든 생성형 AI 시도에서 즉각적이고 광범위한 성공을 보장한다.","처음부터 시작하지 않고 Google의 AI 발전을 활용할 수 있다.","모든 기업이 'AI 우선' 기업이 되도록 강제한다.","조직 전반의 사내 생성형 AI 지식·실험 필요성을 없애준다."],
+ a:1,e:"검증된 Google의 AI 기반을 재사용해 처음부터 만들지 않고 빠르게 시작할 수 있습니다."},
+{q:"[전략] 중간관리자와 개별 기여자가 생성형 AI 도입에 참여해야 하는 이유는?",
+ o:["워크플로우에 가까워 영향력 있는 생성형 AI 활용처를 식별할 수 있다.","생성형 AI 실험에 일절 관여하지 않아야 한다.","오직 기술 구현 세부사항에만 집중해야 한다.","일상 업무와 사용자 요구에 대한 이해가 제한적이다."],
+ a:0,e:"현장 업무에 밀접하므로 실효성 있는 적용 기회를 잘 발견합니다."},
+{q:"[전략] Google Cloud를 생성형 AI 개발에 사용하는 이점은?",
+ o:["특정 산업용 사례를 위한 제한된 사전학습 모델만 제공한다.","확장 가능한 인프라, 엔터프라이즈급 거버넌스·보안을 포함한 포괄적 서비스를 제공한다.","견고한 거버넌스·확장성 없이 개별 개발자 도구에만 주력한다.","복잡한 AI 워크로드 실행에 대규모 선행 하드웨어 투자가 필요하다."],
+ a:1,e:"확장성·거버넌스·보안을 갖춘 포괄적 서비스 제공이 핵심 이점입니다."},
+{q:"[비즈니스] Gemini를 정확히 설명하는 것을 2개 고르세요.",
+ o:["Gemini는 질문에 답하고 창의적 콘텐츠를 만드는 챗봇이다.","Gemini는 Google이 개발한 생성형 AI 모델(또는 모델 제품군)이다.","Gemini는 텍스트·이미지·음악·코드 등 새 콘텐츠를 만들 수 있는 인공지능 유형이다.","Gemini는 이미지 생성 전용으로 설계된 생성형 AI 유형이다.","Gemini는 창의성과 생산성을 높여주는 AI 어시스턴트다."],
+ a:[1,2],multi:true,e:"Gemini는 Google의 생성형 AI 모델 제품군이며, 텍스트·이미지·음악·코드 등 다양한 콘텐츠를 생성합니다. 이미지 전용이 아니고(그건 Imagen), '챗봇/어시스턴트'는 제품 형태 설명으로 모델 정의로는 부정확합니다."},
+{q:"[비즈니스] 다음 중 멀티모달 생성형 AI 애플리케이션을 설명하는 것은?",
+ o:["Imagen으로 웹사이트용 이미지를 만든다.","생성형 AI로 영상 후기와 설문 데이터의 고객 감정을 분석한다.","NotebookLM Business로 재무 보고서를 요약한다.","Gmail의 Gemini로 이메일을 작성한다."],
+ a:1,e:"영상+설문(텍스트) 등 서로 다른 양식을 함께 처리하는 것이 멀티모달입니다."},
+{q:"[비즈니스] 한 CEO가 생성형 AI를 '챗봇 만드는 기술'일 뿐이라 여깁니다. 더 많은 가치를 보여주는 예시는?",
+ o:["텍스트 설명을 바탕으로 신제품 프로토타입의 사실적 이미지를 생성한다.","웹사이트 방문자 수와 위치를 집계한다.","회의 일정과 캘린더를 관리해 직원 시간관리를 돕는다.","구체적 사안과 무관하게 모든 문의에 일반적 답변을 제공한다."],
+ a:0,e:"이미지 생성처럼 챗봇을 넘어선 창작 활용이 생성형 AI의 폭넓은 가치를 보여줍니다."},
+{q:"[비즈니스] 다음 중 생성형 AI를 정의하는 것은?",
+ o:["반복 작업 자동화와 효율 향상에 초점을 둔 인공지능.","기존 데이터를 분석해 패턴을 식별하고 예측하는 인공지능.","이미지·텍스트·음악 등 새로운 콘텐츠를 만들 수 있는 인공지능.","챗봇처럼 AI 기술을 활용하는 특정 애플리케이션."],
+ a:2,e:"생성형 AI의 핵심은 '새로운 콘텐츠 생성'입니다."},
+{q:"[파운데이션] 파운데이션 모델 맥락에서 프롬프트의 목적은?",
+ o:["모델에 입력을 제공해 출력을 유발한다.","모델을 새 데이터로 학습시킨다.","특정 작업을 위해 모델을 파인튜닝한다.","모델의 성능을 평가한다."],
+ a:0,e:"프롬프트는 모델에 주는 입력으로, 원하는 출력을 이끌어냅니다."},
+{q:"[파운데이션] 파운데이션 모델과 프롬프트 엔지니어링은 어떻게 함께 가치를 만드나요?",
+ o:["파운데이션 모델이 컴퓨팅 파워를 제공하고, 프롬프트 엔지니어링이 그 파워를 특정 작업에 활용한다.","파운데이션 모델이 윤리적 사용을 보장하고, 프롬프트 엔지니어링이 출력 품질·창의성을 높인다.","프롬프트 엔지니어링이 파운데이션 모델을 특정 작업에 학습시켜 고도로 특화된 결과를 만든다.","파운데이션 모델이 방대한 지식 기반을 제공하고, 프롬프트 엔지니어링이 그 지식을 응답에 활용하도록 안내한다."],
+ a:3,e:"모델은 '방대한 지식 기반', 프롬프트 엔지니어링은 그 지식을 끌어내는 '안내' 역할입니다."},
+{q:"[파운데이션] 파운데이션 모델과 전통적 AI 모델의 주요 차이는?",
+ o:["파운데이션은 단일 작업용 특정 데이터로, 전통 모델은 다양한 작업용 다양한 데이터로 학습된다.","파운데이션 모델은 새 작업에 적응할 수 없고 전통 모델은 가능하다.","파운데이션은 다양한 작업을 위해 방대하고 다양한 데이터로, 전통 모델은 단일 작업용 특정 데이터로 학습된다.","파운데이션은 텍스트만, 전통 모델은 이미지·코드를 사용한다."],
+ a:2,e:"파운데이션 모델=대규모·다양한 데이터로 범용, 전통 모델=특정 데이터로 단일 작업."},
+{q:"[파운데이션] 파운데이션 모델의 주요 특징은?",
+ o:["초기 사전학습 기능에 한정됨.","단일 작업에 특화됨.","광범위한 작업에 대한 적응력.","작고 특정한 데이터셋으로 학습됨."],
+ a:2,e:"핵심 특징은 다양한 작업에 두루 적용 가능한 적응력(범용성)입니다."},
+{q:"[파운데이션] 다음 중 파운데이션 모델을 정의하는 것은?",
+ o:["특정 작업 수행을 위해 좁은 데이터셋으로 학습된 작고 특화된 AI 모델.","AI 모델 학습·배포에 쓰이는 하드웨어 인프라.","방대한 양의 데이터로 학습되어 다양한 작업에 적응할 수 있는 대형 AI 모델.","명시적으로 정의된 규칙에 의존하는 전통적 머신러닝 알고리즘."],
+ a:2,e:"파운데이션 모델은 대규모 데이터로 학습되어 다양한 작업에 적응하는 대형 모델입니다."},
+{q:"[Quiz 3] AI 기반 대출 심사 시스템을 개발 중입니다. 시스템이 책임감 있게 개발되도록 보장하기 위해 취해야 할 조치는 무엇입니까? 2개를 선택하세요.",
+ o:["의사결정 과정을 이해하기 어렵더라도 예측 정확도가 매우 높은 복잡한 '블랙박스' 모델을 사용한다.","시간이 지남에 따라 발생할 수 있는 편향을 식별하고 완화하기 위해 모델의 성능을 정기적으로 감사한다.","다양한 인구통계 및 사회경제적 배경을 대표할 수 있도록 다양한 지원자가 포함된 데이터셋으로 모델을 학습시킨다.","공정하고 편향되지 않은 결정을 내릴 수 있는 능력을 신뢰하여 인간의 감독 없이 모델을 배포한다.","공정성과 투명성보다 속도와 효율성을 우선시한다. 비즈니스 성공에 더 중요한 요소이기 때문이다."],
+ a:[1,2],multi:true,e:"책임감 있는 AI를 위해서는 모델 편향에 대한 정기적인 감사와 대표성 있는 다양한 데이터셋을 통한 학습이 필수적입니다."},
+{q:"[Quiz 3] '모델 학습(model training)' 단계를 보호(securing)하는 데 있어 핵심적인 측면은 무엇입니까?",
+ o:["더 빠른 처리를 위해 모델을 최적화한다.","무단 액세스로부터 학습 데이터와 모델 파라미터를 보호한다.","사용되는 학습 데이터의 양을 최소화한다.","모델의 출력이 시각적으로 매력적인지 확인한다."],
+ a:1,e:"학습 단계를 보호하는 것은 주로 무단 접근으로부터 데이터와 파라미터(가중치 등)를 안전하게 지키는 것을 의미합니다."},
+{q:"[Quiz 3] 안전한 AI 프레임워크(SAIF, Secure AI Framework)의 주요 목표는 무엇입니까?",
+ o:["잠재적인 보안 위험에 대한 우려로 인해 AI 개발 및 배포를 제한한다.","AI 환경의 고유한 과제와 위협을 해결하며, 책임감 있게 AI를 구축하고 배포하기 위한 보안 표준을 확립한다.","오로지 AI 시스템에 대한 외부 공격을 방지하는 데만 집중한다.","보안 위험을 고려하지 않고 혁신을 촉진하고 AI 개발을 가속화한다."],
+ a:1,e:"SAIF는 책임감 있는 AI 구축과 배포를 위해 고안된 강력하고 특화된 보안 표준을 확립하는 것을 목표로 합니다."},
+{q:"[Quiz 3] AI 학습에 부정확하거나 불완전한 데이터를 사용할 경우 발생할 수 있는 잠재적인 결과는 무엇입니까?",
+ o:["파인튜닝 및 추가 모델 학습의 필요성이 사라진다.","편향된 결과와 불공정한 결과를 초래한다.","데이터 스토리지 비효율성을 초래한다.","비효율적인 사용자 인터페이스를 초래한다."],
+ a:1,e:"부정확하고 불완전한 데이터는 모델이 편향을 학습하게 만들어 불공정한 결과를 내는 원인이 됩니다."},
+{q:"[Quiz 3] 윤리적 AI 개발의 주요 목표는 무엇입니까?",
+ o:["모든 법률 및 규제 요구 사항을 준수한다.","사회적 영향과 관계없이 AI 기능을 극대화한다.","AI 시스템의 투명성과 책임성을 촉진한다.","AI 시스템이 책임감 있게 사용되며 피해를 입히지 않도록 보장한다."],
+ a:3,e:"투명성도 중요하지만, 윤리적 AI의 궁극적인 목표는 시스템이 책임감 있게 쓰이고 사람들에게 해를 끼치지 않도록 하는 것입니다."},
+{q:"[Quiz 2] 인간의 언어를 이해하고 생성하도록 특별히 설계된 파운데이션 모델 유형은 무엇입니까?",
+ o:["대형 언어 모델 (LLM)","멀티모달 모델 (Multimodal model)","디퓨전 모델 (Diffusion model)","예측 모델 (Predictive model)"],
+ a:0,e:"LLM은 텍스트/인간 언어를 이해하고 생성하도록 구축된 모델입니다."},
+{q:"[Quiz 2] 파운데이션 모델 성능의 한계를 극복하기 위해 사용할 수 있는 기술은 무엇입니까?",
+ o:["고급 알고리즘 및 데이터 구조.","그라운딩(Grounding), 프롬프트 엔지니어링, 파인튜닝, 휴먼인더루프(HITL).","향상된 처리 능력และ 더 빠른 하드웨어.","외부 지식 소스에 대한 AI 모델의 접근을 제한하여 환각(hallucination) 방지."],
+ a:1,e:"그라운딩, 프롬프트 엔지니어링, 파인튜닝, 인간의 검토(HITL)는 파운데이션 모델의 한계를 보완하고 정확도를 높이는 주요 기법입니다."},
+{q:"[Quiz 2] 텍스트 설명에서 사실적인 이미지를 생성하는 데 가장 적합한 파운데이션 모델 유형은 무엇입니까?",
+ o:["분류 모델 (Classification model)","디퓨전 모델 (Diffusion model)","멀티모달 모델 (Multimodal model)","대형 언어 모델 (LLM)"],
+ a:1,e:"디퓨전 모델(예: Imagen)은 텍스트에서 이미지를 생성하는 표준 파운데이션 모델입니다."},
+{q:"[Quiz 2] 머신러닝에서 휴먼인더루프(HITL, Humans in the loop)의 주된 역할은 무엇입니까?",
+ o:["모든 의사결정 과정을 자동화한다.","특히 판단이나 문맥이 필요한 작업에서 인간의 전문 지식을 ML 과정에 통합한다.","데이터 수집 및 모델 학습의 필요성을 제거한다.","AI 알고리즘을 완전히 대체한다."],
+ a:1,e:"HITL은 AI가 놓칠 수 있는 미묘한 뉘앙스나 중요한 판단이 필요한 영역에 인간의 통찰력을 결합하는 역할을 합니다."},
+{q:"[Quiz 2] 생성형 AI에서 그라운딩(grounding)의 주된 목적은 무엇입니까?",
+ o:["AI 애플리케이션 배포 비용을 절감한다.","AI의 출력을 검증 가능한 정보 출처와 연결한다.","AI 모델 학습의 속도와 효율성을 높인다.","AI의 창의적인 콘텐츠 생성 능력을 향상시킨다."],
+ a:1,e:"그라운딩은 환각(할루시네이션)을 방지하기 위해 AI의 답변을 검증 가능한 외부 문서나 사실 기반에 연결하는 과정입니다."},
+{q:"[Quiz 2] 모델을 선택할 때 파인튜닝 및 맞춤화가 중요한 요소인 이유는 무엇입니까?",
+ o:["모델이 항상 사용 가능하도록 보장한다.","모델의 컨텍스트 창(context window)을 늘려준다.","모델 사용 비용을 줄여준다.","특정 작업이나 도메인에 맞게 모델을 조정할 수 있게 해준다."],
+ a:3,e:"파인튜닝은 범용 모델을 특정 산업 도메인이나 조직의 특정 작업에 맞게 전문화할 수 있도록 해줍니다."},
+{q:"[Quiz 1] 강화학습(Reinforcement learning)에서 에이전트가 학습하는 주된 방법은 무엇입니까?",
+ o:["라벨이 지정된 예제의 대규모 데이터셋을 분석하여 학습한다.","환경과 상호작용하고 피드백을 받으면서 학습한다.","올바른 행동에 대해 명시적으로 프로그래밍되어 학습한다.","전문가의 시연을 관찰하고 모방하여 학습한다."],
+ a:1,e:"강화학습은 에이전트가 환경과 상호작용하며 그에 따른 보상이나 패널티(피드백)를 통해 시행착오를 거치며 학습하는 방식입니다."},
+{q:"[Quiz 1] 올바른 ML 수명주기(lifecycle) 단계를 순서대로 나열한 것은?",
+ o:["모델 학습 > 데이터 수집 및 준비 > 모델 배포 > 모델 관리","모델 학습 > 모델 배포 > 모델 관리 > 데이터 수집 및 준비","데이터 수집 및 준비 > 모델 학습 > 모델 배포 > 모델 관리","데이터 수집 및 준비 > 모델 학습 > 모델 관리 > 모델 배포"],
+ a:2,e:"데이터를 준비(Ingestion)한 뒤, 모델을 학습(Training)시키고, 배포(Deployment)한 후, 마지막으로 모니터링/관리(Management)하는 것이 올바른 순서입니다."},
+{q:"[Quiz 1] 다음 중 비정형(unstructured) 데이터의 예는 무엇입니까?",
+ o:["고객 이름, 주소, 구매 내역이 포함된 스프레드시트.","직원 이름, 급여, 직함이 포함된 테이블.","자유 형식의 텍스트 단락으로 된 고객 리뷰 모음.","제품 ID, 가격, 재고 수준이 포함된 데이터베이스."],
+ a:2,e:"자유 형식의 텍스트는 미리 정의된 데이터 모델이나 구조가 없으므로 비정형 데이터에 해당합니다."},
+{q:"[Quiz 1] ML 워크플로우에서 데이터 수집 및 준비(ingestion and preparation) 단계의 주된 목적은 무엇입니까?",
+ o:["원시 데이터를 수집, 정제 및 변환한다.","머신러닝 모델을 학습시킨다.","모델 성능을 모니터링한다.","학습된 모델을 배포한다."],
+ a:0,e:"데이터 수집 및 준비 단계는 모델을 학습시키기 전에 데이터를 모으고, 노이즈를 제거하며, 적절한 형식으로 변환하는 것에 집중합니다."},
+{q:"[Quiz 1] 일관성(consistency)이 AI 모델 학습에 미치는 영향은 무엇입니까?",
+ o:["데이터 검색 속도를 높여준다.","데이터가 작업과 관련성이 있도록 보장한다.","데이터 스토리지 필요성을 줄여준다.","일관되지 않은 형식과 라벨링은 모델을 혼란스럽게 하고 학습을 방해할 수 있다."],
+ a:3,e:"데이터 형식과 라벨링에 일관성이 없으면 알고리즘이 올바른 패턴을 찾지 못하고 혼란을 겪어 모델 성능이 저하됩니다."},
+{q:"[Quiz 1] 머신러닝의 맥락에서 '모델(model)'이란 무엇입니까?",
+ o:["데이터의 시각적 표현.","일종의 컴퓨터 하드웨어.","의사결정을 위해 사전 정의된 규칙 집합.","입력을 처리하여 출력을 생성하는 복잡한 수학적 구조."],
+ a:3,e:"ML 모델은 알고리즘이 데이터의 패턴을 학습하여 입력을 기반으로 예측(출력)을 수행하도록 만들어진 수학적 함수이자 구조입니다."},
+
+/* ===== 38 New Questions Added From Additional PDFs (Korean Translation, Cleansed) ===== */
+{q:"생성형 AI 솔루션을 구현할 때 긍정적 영향을 계획하기 위한 주요 단계는 무엇입니까?",
+ o:["기수 채택에 집중하고 긍정적인 영향이 뒤따를 것이라고 가정한다.","윤리적 영향을 고려하지 않고 AI 기능을 우선시한다.","초기에는 단기적인 목표에 집중하여 데이터를 수집하고 분석한다.","주요 지표를 정의하고, 데이터를 수집 및 분석하며, 반복하고 개선한다."],
+ a:3,e:"목표 지표를 정의하고 데이터를 수집, 반복 및 개선하는 것이 권장되는 계획 단계입니다."},
+{q:"Vertex AI Search의 핵심 기능 중 생성형 AI의 환각(hallucination) 문제를 완화하고 검색 결과가 신뢰할 수 있는 정보에 기반하도록 보장하는 기능은 무엇입니까?",
+ o:["세분화된 액세스 제어 (Granular access controls)","그라운딩 (Grounding)","고급 분석 (Advanced analytics)","멀티모달 검색 (Multimodal search)"],
+ a:1,e:"그라운딩은 출력을 구체적이고 검증 가능한 신뢰할 수 있는 정보 출처에 연결합니다."},
+{q:"다음 중 AI 에이전트의 핵심 구성 요소를 가장 잘 식별하는 것은 무엇입니까?",
+ o:["API 연결, 클라우드 기능, 정교한 데이터베이스.","복잡한 알고리즘, 사용자 인터페이스, 데이터 저장 시스템.","추론 루프(reasoning loop), 도구(tools), 파운데이션 모델.","자세한 사용자 매뉴얼, 고객 서비스 챗봇, 고급 마케팅 기술."],
+ a:2,e:"AI 에이전트의 주요 구성 요소는 파운데이션 모델, 외부 작업을 수행하는 도구, 의사 결정을 위한 추론 루프입니다."},
+{q:"조직 내에서 Gemini Enterprise의 주된 목적은 무엇입니까?",
+ o:["AI 기반 챗봇과 상호작용하기 위한 고객용 인터페이스를 제공한다.","회사 데이터를 활용하여 직원을 지원할 수 있는 AI 에이전트를 구성하고 접근하기 위한 중앙 플랫폼을 제공한다.","데이터 유출을 탐지하고 방지하여 조직의 사이버 보안 방어를 강화한다.","모든 회사 데이터를 저장하고 관리하기 위한 중앙 리포지토리를 생성한다."],
+ a:1,e:"Gemini Enterprise는 기업 데이터를 바탕으로 내부 직원을 돕는 맞춤형 AI 에이전트를 구축 및 관리할 수 있게 해줍니다."},
+{q:"Google Cloud의 Customer Engagement Suite로 대화형 에이전트를 구축할 때 하이브리드 접근 방식(결정론적 AI와 생성형 AI 결합)을 사용하는 주요 이점은 무엇입니까?",
+ o:["에이전트가 간단하고 예측 가능한 고객 문의만 처리할 수 있게 해준다.","생성형 AI의 유연성을 활용하면서도 에이전트의 행동을 엄격하게 제어할 수 있게 해준다.","고객 상호작용에서 인간 상담원의 필요성을 없애준다.","일관성을 보장하기 위해 에이전트 응답을 사전 정의된 스크립트로 제한한다."],
+ a:1,e:"하이브리드 접근 방식은 생성형 AI의 유연성을 누리면서도 동시에 규칙 기반(결정론적)으로 엄격한 통제가 가능하다는 이점이 있습니다."},
+{q:"제공된 정보에 따르면 검색 증강 생성(RAG) 워크플로우에서 대형 언어 모델(LLM)은 데이터 저장소(data stores)와 어떻게 상호작용합니까?",
+ o:["LLM은 데이터 저장소에서 수동적으로 정보를 수신하며 업데이트가 푸시되기를 기다린다.","LLM은 데이터 저장소를 사용하여 기본 지식과 매개변수를 영구적으로 확장한다.","LLM은 사용자의 요청과 관련된 정보를 검색하기 위해 데이터 저장소에 질의(query)하고, 이를 통해 응답을 풍부하게 만든다.","LLM은 응답 생성에 전적으로 데이터 저장소에만 의존하며 내부 지식은 무시한다."],
+ a:2,e:"RAG 환경에서 LLM은 능동적으로 외부 데이터 저장소에 질의하여 관련 문맥을 불러온 뒤 답변을 생성합니다."},
+{q:"다음 중 생성형 AI 에이전트 내에서 '추론 루프(reasoning loop)'의 기능을 가장 잘 설명하는 것은 무엇입니까?",
+ o:["에이전트가 대화형 방식으로 사용자와 상호작용하고 프롬프트와 질문에 응답할 수 있게 한다.","에이전트가 편차 없이 따를 수 있는 일회성 지침 세트를 설정한다.","에이전트가 작업을 해결하기 위해 관찰, 내부 추론 및 의사 결정의 반복적인 과정을 거치도록 안내한다.","예측 가능한 행동을 보장하기 위해 에이전트의 행동을 사전 정의된 응답 세트로 제한한다."],
+ a:2,e:"추론 루프는 에이전트가 상황을 관찰하고, 생각(추론)하고, 결정을 내려 행동하는 반복적 과정입니다."},
+{q:"팀 회의 일정을 잡는 임무를 맡은 AI 에이전트가 있다고 상상해 보십시오. 에이전트는 팀원들의 캘린더에 접근하고, 적절한 시간대를 제안하며, 초대장을 보내야 합니다. 이 작업에 가장 필수적인 에이전트 도구의 조합은 무엇입니까?",
+ o:["데이터 저장소(Data stores)와 함수(functions).","플러그인(Plugins)과 데이터 저장소(data stores).","함수(Functions)와 데이터베이스(databases).","확장 프로그램(Extensions)과 플러그인(plugins)."],
+ a:3,e:"캘린더에서 일정을 확인하거나 초대장을 보내는 외부 시스템 연동에는 주로 Extensions(확장) 및 Plugin(플러그인)과 같은 API 도구가 사용됩니다."},
+{q:"다음 중 생성형 AI의 맥락에서 멀티 에이전트 시스템(multi-agent system)의 개념을 가장 잘 보여주는 시나리오는 무엇입니까?",
+ o:["데이터베이스, 웹 검색 API 등 여러 도구를 사용하여 작업을 완료하는 단일 AI 에이전트.","다양한 작업에 적응하기 위해 다양한 매개변수로 맞춤화할 수 있는 AI 에이전트.","예를 들어 여행 예약과 같은 복잡한 목표를 달성하기 위해 여러 전문 AI 에이전트가 협업하는 시스템.","이메일 작성 및 문서 요약과 같은 여러 작업을 수행할 수 있는 단일 AI 에이전트."],
+ a:2,e:"멀티 에이전트 시스템은 전체 목표 달성을 위해 각기 다른 역할을 맡은 여러 특화 에이전트들이 협업하는 구조입니다."},
+{q:"Google AI Studio에서 Gemini 출력의 무작위성(randomness)과 창의성을 제어하기 위해 조정해야 하는 매개변수는 무엇입니까?",
+ o:["토큰 수 (Token count)","안전 설정 (Safety settings)","출력 길이 (Output length)","Temperature"],
+ a:3,e:"Temperature 값을 조정하면 모델이 답변을 생성할 때 무작위성과 창의성 정도를 제어할 수 있습니다."},
+{q:"타깃 사용자와 관련하여 Google AI Studio와 Vertex AI Studio의 주된 차이점은 무엇입니까?",
+ o:["Google AI Studio는 맞춤형 모델 구축을 위한 것이고, Vertex AI Studio는 사전 학습된 모델 사용을 위한 것이다.","Google AI Studio는 코딩 경험이 필요한 반면, Vertex AI Studio는 모델과 상호작용하기 위한 노코드(no-code) 인터페이스를 제공한다.","Google AI Studio는 초보자와 실험용으로 설계된 반면, Vertex AI Studio는 전문가와 대규모 프로젝트를 대상으로 한다.","Google AI Studio는 이미지 생성 모델 액세스를 위한 것이고, Vertex AI Studio는 텍스트 기반 모델을 위한 것이다."],
+ a:2,e:"Google AI Studio는 프로토타이핑과 실험에 적합하고, Vertex AI Studio는 엔터프라이즈 수준의 본격적인 프로젝트에 적합합니다."},
+{q:"Gemini for Google Cloud의 엔터프라이즈 보안 모델에 대한 설명 중 옳은 것은 무엇입니까?",
+ o:["Google이 고객 데이터에 대한 액세스 및 권한을 통제한다.","고객 데이터는 공개적으로 접근 가능한 데이터셋에 포함된다.","고객 데이터는 타사 개발자와 공유된다.","고객 데이터는 암호화되며 액세스 제어가 적용된다."],
+ a:3,e:"엔터프라이즈 환경에서는 고객의 데이터가 공개 모델 학습에 사용되거나 공유되지 않으며, 암호화되고 엄격히 제어됩니다."},
+{q:"개발팀이 코딩 효율성과 협업을 향상시키려 합니다. 그들에게 가장 유익한 Gemini for Google Cloud 도구는 무엇입니까?",
+ o:["Gemini in Security Command Center","Gemini in Databases","Gemini Code Assist","Gemini Cloud Assist"],
+ a:2,e:"Gemini Code Assist는 개발자의 코드 작성, 리뷰, 수정 및 협업을 돕기 위해 특별히 제작된 도구입니다."},
+{q:"문서에서 프롬프트를 복사하여 붙여넣는 방식으로 재사용하는 것과 비교할 때, Gemini의 저장된 정보(Saved info) 기능을 사용하는 것의 주요 이점은 무엇입니까?",
+ o:["저장된 정보(Saved info)는 당신의 직무나 회사 세부 정보와 같은 특정 정보가 모든 Gemini 대화에 일관되게 적용되도록 보장한다.","저장된 정보는 모든 동료와 자동으로 공유되어 협업을 촉진한다.","저장된 정보는 Gemini 비밀번호를 저장하는 곳이다.","저장된 정보를 통해 굵은 글씨체나 글머리 기호 같은 더 풍부한 서식을 프롬프트에 저장할 수 있다."],
+ a:0,e:"'Saved info(저장된 정보)'는 사용자의 배경 맥락을 영구적으로 저장하여 일일이 다시 입력할 필요 없이 일관되게 적용해줍니다."},
+{q:"그라운딩(grounding)은 Gemini에서 Gem의 신뢰성을 어떻게 향상시킵니까?",
+ o:["Gem이 사용자 상호작용에서 학습하여 시간이 지남에 따라 응답을 개선할 수 있게 한다.","Gem이 인터넷의 어떤 웹사이트 정보든 접근하고 처리할 수 있게 한다.","Gem의 출력을 구체적이고 검증 가능한 정보 출처와 연결한다.","Gem이 부정확한 응답을 생성하는 것을 완전히 방지한다."],
+ a:2,e:"그라운딩은 출력을 사실 기반의 검증 가능한 출처와 연결하여 허위 사실 생성을 억제합니다."},
+{q:"당신은 신제품 출시에 대해 논의할 회의를 준비 중인 제품 관리자입니다. Google 드라이브에는 시장 조사 보고서, 경쟁사 분석 및 고객 피드백 설문조사가 저장되어 있습니다. NotebookLM이 이 회의 준비를 어떻게 도울 수 있습니까?",
+ o:["NotebookLM은 문서에서 주요 결과를 요약하고, 잠재적 과제를 식별하며, 논의할 핵심 주제를 제공하여 생산적인 회의를 이끌도록 도울 수 있다.","NotebookLM은 팀원들의 성격에 기반하여 그들이 할 질문을 예측하고 답변을 미리 준비할 수 있다.","NotebookLM은 추천 의제와 함께 모든 회의 참석자에게 캘린더 초대장을 자동으로 보낼 수 있다.","NotebookLM은 회의용 슬라이드와 스크립트가 포함된 프레젠테이션을 자동으로 생성할 수 있다."],
+ a:0,e:"NotebookLM은 업로드된 여러 소스 문서를 기반으로 핵심 인사이트를 연결하고 요약하는데 최적화되어 있습니다."},
+{q:"AI 모델에서 RAG(Retrieval-Augmented Generation, 검색 증강 생성)의 주요 기능은 무엇입니까?",
+ o:["방대한 양의 정보를 암기하는 AI 모델의 능력을 향상시킨다.","AI 모델의 출력을 사전 정의된 응답 세트로 제한한다.","AI 모델이 출력을 생성할 때 외부 지식 소스에 접근하고 활용할 수 있게 한다.","AI 모델의 출력 생성 과정에서 인간의 개입을 대체한다."],
+ a:2,e:"RAG는 모델이 응답을 생성하기 전 외부 문서나 데이터 저장소에서 관련 정보를 '검색(Retrieval)'해 오도록 하는 기능입니다."},
+{q:"팀 프로젝트에 NotebookLM Enterprise를 사용할 때의 주요 이점은 무엇입니까?",
+ o:["NotebookLM Enterprise는 NotebookLM 개인용 제품과 동일하다.","Google이 NotebookLM Enterprise의 데이터를 통제한다.","NotebookLM Enterprise에서는 사전 정의된 Identity and Access Management(IAM) 역할을 사용하여 노트북 접근을 관리할 수 있다.","Google이 NotebookLM Enterprise의 모든 데이터에 접근할 수 있다."],
+ a:2,e:"엔터프라이즈 버전은 회사의 기존 IAM 정책과 통합되어 안전한 접근 및 권한 관리를 제공합니다."},
+{q:"당신은 블로그 글, SNS 캡션, 웹사이트 문구 등 다양한 유형의 콘텐츠를 제작하는 프리랜서 작가입니다. 프로젝트에 따라 다양한 글쓰기 스타일과 어조 사이를 자주 전환해야 합니다. 작업 흐름을 간소화하고 다양한 형식에 걸쳐 일관된 글쓰기를 보장하려고 합니다. 요구 사항에 가장 적합한 Gemini의 기능은 무엇입니까?",
+ o:["Gems","Gemini for Google Cloud","Gemini Saved info","Gemini Deep Research"],
+ a:0,e:"Gems를 활용하면 특정한 역할, 글쓰기 스타일, 어조를 고정해둔 맞춤형 인공지능을 여러 개 만들 수 있습니다."},
+{q:"당신은 다양한 시간대에 위치한 동료들과 Google Meet로 화상 회의를 이끌고 있습니다. 일부 참석자들은 언어 장벽 때문에 논의를 이해하는 데 어려움을 겪고 있습니다. Gemini가 이 Google Meet 화상 회의를 어떻게 지원할 수 있습니까?",
+ o:["Gemini는 회의 채팅에 음성 대화의 번역된 요약을 제공할 수 있다.","Gemini는 화자 식별 기능이 포함된 실시간 번역 자막을 생성하여, 언어나 억양 차이에 관계없이 모두가 쉽게 따라갈 수 있게 해준다.","Gemini는 모두가 동일하게 잘 들을 수 있도록 각 화자의 볼륨을 자동으로 조절할 수 있다.","Gemini는 회의에 참석하지 못한 사람들을 위해 논의 내용을 자동으로 요약할 수 있다."],
+ a:1,e:"실시간 번역 자막 기능은 언어 장벽이 있는 글로벌 회의에서 참석자의 접근성과 이해도를 크게 높여줍니다."},
+{q:"프롬프트에 예시를 전혀 제공하지 않고 파운데이션 모델의 기존 지식에만 전적으로 의존하는 프롬프팅 기법은 무엇입니까?",
+ o:["멀티 샷 프롬프팅 (Multi-shot prompting)","제로 샷 프롬프팅 (Zero-shot prompting)","퓨 샷 프롬프팅 (Few-shot prompting)","원 샷 프롬프팅 (One-shot prompting)"],
+ a:1,e:"예시를 제공하지 않고 작업을 지시하는 것을 제로 샷(Zero-shot) 프롬프팅이라고 합니다."},
+{q:"역할(Role) 프롬프팅을 사용할 때의 주된 이점은 무엇입니까?",
+ o:["AI 모델이 몇 가지 예시를 통해 학습할 수 있게 해준다.","출장 일정 계획과 같은 복잡한 작업을 가능하게 한다.","AI에 특정 페르소나를 부여하여 응답의 스타일, 어조 및 초점에 영향을 준다.","복잡한 질문을 이해하는 AI 모델의 능력을 향상시킨다."],
+ a:2,e:"역할 프롬프팅은 AI에게 구체적인 페르소나를 할당해 답변의 톤앤매너와 관점을 원하는 방향으로 조정하는 데 유리합니다."},
+{q:"언어 학습 앱을 설계 중이며 대화 연습을 하는 학생들에게 개인화된 피드백을 제공할 수 있는 AI 튜터를 통합하고자 합니다. AI와 학생의 상호작용을 안내하는 데 가장 효과적인 역할 프롬프트는 무엇입니까?",
+ o:["\"당신은 언어 학습 연습에 대해 건설적인 피드백을 제공하는 유용하고 격려하는 튜터입니다.\"","\"대화 기술을 연습하는 학생들에게 개인화된 피드백을 제공하시오.\"","\"당신은 학생들이 새로운 언어를 배우는 것을 돕기 위해 만들어진 언어 모델입니다.\"","\"당신은 언어 능력을 평가하도록 프로그래밍된 로봇입니다.\""],
+ a:0,e:"페르소나의 톤(유용하고 격려하는)과 구체적인 역할(건설적인 피드백 제공)이 가장 잘 명시되어 있습니다."},
+{q:"당신은 신규 고객을 위한 제안서를 작성 중이며, 글이 명확하고 간결하며 설득력 있도록 보장하고 싶습니다. Google 문서(Docs)의 Gemini가 이 작업에 어떻게 도움을 줄 수 있습니까?",
+ o:["Docs의 Gemini는 고객 프로젝트에서의 역할에 따라 팀원들에게 자동으로 작업을 할당할 수 있다.","Docs의 Gemini는 과거 상호작용을 기반으로 제안서에 대한 고객의 반응을 예측할 수 있다.","Docs의 Gemini는 글쓰기 스타일, 문법, 어조를 개선하기 위한 제안을 제공하고, 메시지 전달력을 높이기 위한 다양한 표현 옵션을 생성할 수 있다.","Docs의 Gemini는 제안서 내용을 분석하고 그 효과를 높이기 위한 차트 및 그래프 같은 관련 시각 자료를 자동으로 생성할 수 있다."],
+ a:2,e:"Google 문서의 Gemini는 어조 변경, 문법 수정 및 다양한 문구 옵션을 제안하는 강력한 편집기 역할을 합니다."},
+{q:"AI 애플리케이션을 위한 엣지 컴퓨팅(edge computing)의 주된 장점은 무엇입니까?",
+ o:["데이터 저장 용량 증가","개발 비용 감소","데이터 전처리 필요성 감소","실시간 응답성 및 지연 시간(latency) 감소"],
+ a:3,e:"엣지 디바이스 내에서 데이터를 처리하면 원격 서버로 데이터를 보낼 필요가 없어 지연 시간(latency)이 크게 단축됩니다."},
+{q:"마케팅팀이 다가오는 이커머스 세일을 위해 매력적인 제품 설명글을 빠르게 생성해야 합니다. 이를 달성하는 데 가장 효율적인 접근 방식은 무엇입니까?",
+ o:["기존 제품 데이터를 사용하여 Model Garden에서 사전 학습된 언어 모델을 파인튜닝한다.","카피라이터 팀을 고용하여 각 설명을 수동으로 작성한다.","설명글의 초안을 작성하기 위해 Gemini가 포함된 Google Workspace와 같은 생성형 AI 기반 애플리케이션을 사용한다.","제품 설명 생성을 위해 처음부터 맞춤형 모델을 구축한다."],
+ a:2,e:"이와 같은 일상적이고 신속한 초안 작성 작업에는 사전 구축된 애플리케이션(예: Workspace)이 가장 빠르고 효율적입니다."},
+{q:"맞춤형 AI 에이전트를 구축 및 배포하고 AI 기능을 애플리케이션에 통합하는 책임을 지는 역할은 누구입니까?",
+ o:["비즈니스 리더 (Business leaders)","네트워크 엔지니어 (Network engineers)","개발자 (Developers)","AI 실무자 (AI practitioners)"],
+ a:2,e:"애플리케이션 계층에 AI 기능을 연동하고 시스템을 개발, 배포하는 역할은 주로 개발자(Developers)가 수행합니다."},
+{q:"Gemini Nano는 무엇을 위해 설계되었습니까?",
+ o:["엣지 디바이스 및 스마트폰에 AI 배포","슈퍼컴퓨터에서 복잡한 시뮬레이션 실행","데이터 센터에서 대형 언어 모델 학습","AI 인프라 관리 및 모니터링"],
+ a:0,e:"Nano 모델은 모바일 기기와 엣지 디바이스에서 온디바이스로 작동하도록 최적화된 경량 모델입니다."},
+{q:"AI 인프라의 맥락에서 GPU와 TPU는 무엇입니까?",
+ o:["AI 작업에서 병렬 처리를 위해 설계된 특수 프로세서(하드웨어).","AI 모델 관리를 위한 소프트웨어 애플리케이션.","대규모 AI 데이터셋을 저장하기 위한 저장 장치.","AI 시스템을 연결하기 위한 네트워킹 프로토콜."],
+ a:0,e:"GPU(그래픽 처리 장치)와 TPU(텐서 처리 장치)는 AI 연산에 필요한 대규모 병렬 처리에 특화된 프로세서입니다."},
+{q:"생성형 AI에서 고성능 스토리지(storage)가 중요한 이유는 무엇입니까?",
+ o:["AI 시스템의 책임감 있는 사용을 보장하기 위해.","AI 모델과 상호작용하기 위한 사용자 친화적인 인터페이스를 제공하기 위해.","AI 모델의 배포 및 관리를 자동화하기 위해.","AI 학습에 사용되는 방대한 데이터셋을 저장하고 효율적으로 접근하기 위해."],
+ a:3,e:"모델 학습을 위해서는 방대한 양의 데이터를 빠르게 읽고 써야 하므로 높은 I/O 성능을 갖춘 스토리지가 병목 방지에 필수적입니다."},
+{q:"Vertex AI에서 AutoML의 목적은 무엇입니까?",
+ o:["데이터 준비부터 배포까지 전체 ML 워크플로우를 자동화한다.","다양한 사용 사례를 위해 사전 학습된 모델을 제공한다.","배포된 AI 모델의 성능을 관리하고 모니터링한다.","사용자가 최소한의 기술적 전문 지식만으로도 AI 모델을 구축하고 학습시킬 수 있게 해준다."],
+ a:3,e:"AutoML은 모델의 복잡한 튜닝과 학습 과정을 자동화하여, 전문적인 머신러닝 지식이 적어도 모델을 학습시킬 수 있게 해줍니다."},
+{q:"Vertex AI에서 MLOps의 역할은 무엇입니까?",
+ o:["입력과 도구를 기반으로 목표를 달성하는 최선의 방법을 학습한다.","ML 프로젝트 수명주기(lifecycle)를 자동화, 표준화 및 관리한다.","사용자가 AI 기능과 상호작용할 수 있게 해준다.","AI 시스템을 위한 물리적 하드웨어를 제공한다."],
+ a:1,e:"MLOps(머신러닝 운영)는 ML 모델의 학습, 배포, 유지관리 과정을 안정적으로 구축하고 표준화하는 프레임워크입니다."},
+{q:"다음 중 Vertex AI의 Model Garden을 가장 잘 설명하는 것은 무엇입니까?",
+ o:["기존 AI 모델을 발견, 맞춤화 및 배포하기 위한 서비스.","처음부터 AI 모델을 개발하고 추가로 실험하기 위한 플랫폼.","사전 학습된 AI 모델을 찾고 배포하기 위해 설계된 서비스.","AI 인프라를 관리하고 모니터링하기 위한 플랫폼."],
+ a:0,e:"Model Garden은 Google 모델 및 오픈소스 모델들을 쉽게 탐색하고, 튜닝하며, 배포할 수 있는 카탈로그 서비스입니다."},
+{q:"한 여행사가 고객의 휴가 계획을 돕기 위해 AI 에이전트를 사용하려고 합니다. 이 AI 기반 여행 계획 경험을 만들기 위해 '에이전트(agents)' 계층과 '애플리케이션(applications)' 계층은 어떻게 함께 작동합니까?",
+ o:["에이전트 계층이 여행 계획 애플리케이션의 사용자 인터페이스를 제공한다.","애플리케이션 계층이 AI 에이전트 작동에 필요한 계산 리소스를 제공한다.","애플리케이션 계층이 항공편 검색이나 호텔 예약과 같이 AI 에이전트가 수행할 특정 작업을 결정한다.","에이전트 계층이 AI의 기능(검색, 예약, 추천)을 정의하고, 애플리케이션 계층이 사용자가 에이전트와 상호작용할 수 있는 화면(웹사이트나 앱)을 제공한다."],
+ a:3,e:"에이전트는 추론과 도구 호출(논리)을 담당하며, 애플리케이션은 사용자가 해당 기능에 접근할 수 있는 껍데기(UI)를 담당합니다."},
+{q:"게임 개발자가 게임 내에서 더 현실적이고 참여를 유도하는 NPC(비플레이어 캐릭터)를 만들고자 합니다. 이 AI 기반 NPC의 행동과 기능을 정의하는 데 생성형 AI 환경의 어느 계층이 가장 중요합니까?",
+ o:["에이전트 (Agents)","플랫폼 (Platforms)","인프라 (Infrastructure)","모델 (Models)"],
+ a:0,e:"NPC가 주변을 관찰하고 동적으로 판단을 내리며 행동하도록 하려면 '에이전트' 계층의 설계가 핵심적입니다."},
+{q:"뉴스 기관이 각 사용자에게 개인화된 뉴스를 전달하는 AI 에이전트를 개발하려고 합니다. 이 개인화된 뉴스 리더 애플리케이션의 기능에서 '에이전트(agents)' 계층은 어떻게 기여합니까?",
+ o:["에이전트 계층이 뉴스 데이터를 저장하고 처리하기 위한 인프라를 제공한다.","에이전트 계층이 뉴스 리더 애플리케이션의 사용자 인터페이스를 디자인한다.","에이전트 계층이 자연어 처리 및 이해를 위한 기본 AI 모델을 제공한다.","에이전트 계층이 기사 필터링, 정보 요약, 추천 등의 AI가 수행할 특정 작업을 정의한다."],
+ a:3,e:"목표 달성을 위해 어떤 구체적인 작업(추천, 요약 등)을 스스로 수행할지 결정하는 것이 에이전트 계층의 역할입니다."},
+{q:"AI 에이전트를 독립 실행형 AI 모델(standalone AI models)과 구별하는 두 가지 핵심 요소는 무엇입니까?",
+ o:["자동화(Automation)와 개인화(personalization).","데이터 접근(Data access)과 사용자 인터페이스(user interface).","자연어 처리(Natural language processing)와 머신러닝(machine learning).","추론 루프(Reasoning loop)와 도구(tools)."],
+ a:3,e:"단순한 모델과 달리 에이전트는 상황을 스스로 분석하는 '추론 루프'와 외부 시스템을 호출하는 '도구'를 갖추고 있습니다."},
+{q:"화상 처리 등을 담당하는 데이터 과학 팀이 방대한 이미지 데이터셋으로 새로운 생성형 AI 모델을 학습시키고 있습니다. 계산 집약적인 학습 과정을 처리하기 위해 강력한 하드웨어 및 소프트웨어 리소스에 대한 접근이 필요합니다. 생성형 AI 환경의 어느 계층이 이 팀에 필요한 계산 능력과 저장 공간을 제공합니까?",
+ o:["플랫폼 (Platforms)","에이전트 (Agents)","인프라 (Infrastructure)","애플리케이션 (Applications)"],
+ a:2,e:"가속기(GPU/TPU)와 대용량 스토리지 같은 물리적인 하드웨어 컴퓨팅 파워는 인프라스트럭처(Infrastructure) 계층에서 제공합니다."}
+];
+
+/* ===== 상태 ===== */
+let cfg={count:93,mode:"instant",shuffle:true};
+let order=[], idx=0, answers=[], revealed=[];
+
+function bindSeg(id,key,parse){
+  document.querySelectorAll('#'+id+' button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#'+id+' button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active'); cfg[key]=parse(b.dataset.v);
+    };
+  });
+}
+bindSeg('seg-count','count',v=>+v);
+bindSeg('seg-mode','mode',v=>v);
+bindSeg('seg-shuffle','shuffle',v=>v==='1');
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a}
+
+function buildOrder(){
+  let ids=[...Array(BANK.length).keys()];
+  if(cfg.shuffle) shuffle(ids);
+  ids=ids.slice(0,Math.min(cfg.count,BANK.length));
+  return ids.map(i=>{
+    const B=BANK[i];
+    const correct=Array.isArray(B.a)?B.a:[B.a];
+    let opts=B.o.map((t,oi)=>({t,correct:correct.includes(oi)}));
+    if(cfg.shuffle) shuffle(opts);
+    const correctIdxs=opts.map((o,k)=>o.correct?k:-1).filter(k=>k>=0);
+    return {q:B.q,e:B.e,multi:!!B.multi,opts,correctIdxs};
+  });
+}
+
+function startExam(){
+  order=buildOrder(); idx=0;
+  answers=new Array(order.length).fill(null);
+  revealed=new Array(order.length).fill(false);
+  document.getElementById('start').classList.add('hide');
+  document.getElementById('result').classList.add('hide');
+  document.getElementById('quiz').classList.remove('hide');
+  renderQ();
+}
+function retry(){ startExam(); }
+
+function renderQ(){
+  const item=order[idx];
+  document.getElementById('qcount').textContent=`문제 ${idx+1} / ${order.length}`;
+  document.getElementById('modeLabel').textContent=cfg.mode==='instant'?'학습 모드':'실전 모드';
+  document.getElementById('prog').style.width=(idx/order.length*100)+'%';
+  document.getElementById('qtext').textContent=item.q;
+  document.getElementById('hint').textContent=item.multi?'✓ 정답 2개를 선택하세요':'';
+  const wrap=document.getElementById('choices'); wrap.innerHTML='';
+  const ex=document.getElementById('explain'); ex.className='explain'; ex.innerHTML='';
+
+  const sel=answers[idx];
+  const selArr=Array.isArray(sel)?sel:(sel===null?[]:[sel]);
+  const revealedNow=item.multi?revealed[idx]:(sel!==null&&cfg.mode==='instant');
+  const letters=['A','B','C','D','E'];
+
+  item.opts.forEach((o,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice';
+    btn.innerHTML=`<span class="dot">${letters[i]}</span><span>${o.t}</span>`;
+    if(revealedNow){
+      btn.disabled=true;
+      if(item.correctIdxs.includes(i)) btn.classList.add('correct');
+      else if(selArr.includes(i)) btn.classList.add('wrong');
+    } else if(selArr.includes(i)) btn.classList.add('sel');
+    btn.onclick=()=>choose(i);
+    wrap.appendChild(btn);
+  });
+
+  if(revealedNow) showExplain();
+
+  const nb=document.getElementById('nextBtn');
+  let show=false,label='',handler=null;
+  const last=(idx===order.length-1);
+  if(item.multi){
+    if(cfg.mode==='instant' && !revealed[idx]){
+      if(selArr.length>0){show=true;label='정답 확인';handler=checkMulti;}
+    } else if(selArr.length>0){show=true;label=last?'채점하기':'다음';handler=nextQ;}
+  } else if(sel!==null){show=true;label=last?'채점하기':'다음';handler=nextQ;}
+  if(show){nb.classList.remove('hide');nb.textContent=label;nb.onclick=handler;}
+  else nb.classList.add('hide');
+}
+
+function choose(i){
+  const item=order[idx];
+  if(item.multi){
+    if(revealed[idx]) return;
+    let arr=Array.isArray(answers[idx])?answers[idx].slice():[];
+    if(arr.includes(i)) arr=arr.filter(x=>x!==i);
+    else { if(arr.length>=item.correctIdxs.length) arr.shift(); arr.push(i); }
+    answers[idx]=arr; renderQ();
+  } else {
+    if(answers[idx]!==null && cfg.mode==='instant') return;
+    answers[idx]=i; renderQ();
+  }
+}
+function checkMulti(){ revealed[idx]=true; renderQ(); }
+
+function showExplain(){
+  const item=order[idx], ex=document.getElementById('explain');
+  let ok;
+  if(item.multi){
+    const s=Array.isArray(answers[idx])?answers[idx]:[];
+    ok=s.length===item.correctIdxs.length && item.correctIdxs.every(c=>s.includes(c));
+  } else ok=answers[idx]===item.correctIdxs[0];
+  ex.className='explain show '+(ok?'ok':'no');
+  const letters=['A','B','C','D','E'];
+  const ans=item.correctIdxs.map(k=>letters[k]+'. '+item.opts[k].t).join('<br>');
+  ex.innerHTML=`<b>${ok?'✅ 정답입니다':'❌ 오답입니다'}</b>
+    <span class="ans">정답: ${ans}</span>
+    <div style="margin-top:8px">${item.e}</div>`;
+}
+
+function nextQ(){
+  if(idx<order.length-1){ idx++; renderQ(); } else finish();
+}
+
+function isCorrect(it,ans){
+  if(it.multi){
+    const s=Array.isArray(ans)?ans:[];
+    return s.length===it.correctIdxs.length && it.correctIdxs.every(c=>s.includes(c));
+  }
+  return ans===it.correctIdxs[0];
+}
+
+function finish(){
+  let c=0;
+  order.forEach((it,i)=>{ if(isCorrect(it,answers[i])) c++; });
+  const total=order.length, pct=Math.round(c/total*100), pass=pct>=75;
+  document.getElementById('quiz').classList.add('hide');
+  document.getElementById('result').classList.remove('hide');
+  document.getElementById('ring').style.background=`conic-gradient(${pass?'#188038':'#e37400'} ${pct}%, #e8ebf3 0)`;
+  document.getElementById('pct').textContent=pct+'%';
+  document.getElementById('ratio').textContent=`${c} / ${total}`;
+  const v=document.getElementById('verdict');
+  v.textContent=pass?'🎉 합격 기준 통과!':'📚 조금 더 복습이 필요해요';
+  v.className='verdict '+(pass?'pass':'fail');
+  document.getElementById('nCorrect').textContent=c;
+  document.getElementById('nWrong').textContent=total-c;
+
+  const rev=document.getElementById('review'); rev.innerHTML='';
+  const wrongs=order.map((it,i)=>({it,i})).filter(x=>!isCorrect(x.it,answers[x.i]));
+  if(wrongs.length){
+    const h=document.createElement('h3'); h.textContent=`오답 리뷰 (${wrongs.length}문항)`; rev.appendChild(h);
+    wrongs.forEach(({it,i})=>{
+      const ans=answers[i];
+      const your=(ans===null||(Array.isArray(ans)&&!ans.length))?'(미응답)':
+        (Array.isArray(ans)?ans.map(k=>it.opts[k].t).join(' / '):it.opts[ans].t);
+      const right=it.correctIdxs.map(k=>it.opts[k].t).join(' / ');
+      const d=document.createElement('div'); d.className='rev-item';
+      d.innerHTML=`<div class="q">Q. ${it.q}</div>
+        <div class="yours">✗ 내 답: ${your}</div>
+        <div class="right">✓ 정답: ${right}</div>
+        <div class="ex">${it.e}</div>`;
+      rev.appendChild(d);
+    });
+  }else{
+    const h=document.createElement('h3'); h.textContent='완벽합니다! 오답이 없어요 👏'; rev.appendChild(h);
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
